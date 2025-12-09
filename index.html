@@ -11,67 +11,6 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- Firebase SDK (Database) -->
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-      import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-      import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-      // --- REPLACE THIS WITH YOUR FIREBASE CONFIG ---
-      // Go to firebase.google.com -> Project Settings -> General -> Your Apps -> SDK Setup and config
-      const firebaseConfig = {
-        apiKey: "YOUR_API_KEY",
-        authDomain: "YOUR_PROJECT.firebaseapp.com",
-        projectId: "YOUR_PROJECT_ID",
-        storageBucket: "YOUR_PROJECT.appspot.com",
-        messagingSenderId: "SENDER_ID",
-        appId: "APP_ID"
-      };
-
-      // Initialize Firebase
-      const app = initializeApp(firebaseConfig);
-      const db = getFirestore(app);
-      const auth = getAuth(app);
-
-      // Sign in silently so we can write to database
-      signInAnonymously(auth).catch((error) => {
-        console.error("Auth Error", error);
-      });
-
-      // Form Handling
-      window.submitEmail = async function(e) {
-        e.preventDefault();
-        const emailInput = document.getElementById('emailInput');
-        const btn = document.getElementById('submitBtn');
-        const successMsg = document.getElementById('successMsg');
-        const formContainer = document.getElementById('formContainer');
-        
-        const email = emailInput.value;
-        if(!email) return;
-
-        // UI Loading State
-        btn.innerHTML = 'Processing...';
-        btn.disabled = true;
-
-        try {
-          await addDoc(collection(db, "subscribers"), {
-            email: email,
-            timestamp: serverTimestamp(),
-            source: 'website_mobile'
-          });
-
-          // Success UI
-          formContainer.classList.add('hidden');
-          successMsg.classList.remove('hidden');
-          successMsg.classList.add('flex');
-        } catch (err) {
-          console.error("Error", err);
-          btn.innerHTML = 'Error. Try again.';
-          btn.disabled = false;
-        }
-      }
-    </script>
-
     <!-- Custom Animations -->
     <style>
         @keyframes float { 0%, 100% { transform: translate(0, 0px); } 50% { transform: translate(0, -20px); } }
@@ -111,10 +50,7 @@
         <div class="flex flex-col items-center text-center mb-10 animate-enter">
             <div class="relative mb-6 group">
                 <div class="absolute inset-0 rounded-full bg-indigo-500 opacity-40 blur-xl"></div>
-                
-                <!-- NEW IMAGE: Updated to "Chase" seed which is a Male Anime Character -->
                 <img src="https://api.dicebear.com/9.x/adventurer/svg?seed=Chase&backgroundColor=b6e3f4" alt="VectorPunk1 Avatar" class="relative w-32 h-32 rounded-full border-4 border-black shadow-2xl object-cover bg-zinc-900">
-            
             </div>
             <h1 class="text-4xl font-bold tracking-tight mb-2">vectorpunk1</h1>
             <p class="text-zinc-400 font-medium">Content Creator. Streamer. Gamer.</p>
@@ -127,7 +63,6 @@
 
         <!-- Links -->
         <div class="w-full max-w-md flex flex-col gap-4 animate-enter delay-100">
-            
             <!-- Twitch -->
             <a href="https://twitch.tv/vectorpunk?sr=a" target="_blank" class="glass-card p-4 rounded-2xl flex items-center gap-4 hover:bg-white/10 transition-all group">
                 <div class="w-12 h-12 rounded-xl bg-black/40 flex items-center justify-center border border-white/10">
@@ -175,7 +110,6 @@
                 </div>
                 <i data-lucide="external-link" class="text-zinc-600 w-4 h-4"></i>
             </a>
-
         </div>
 
         <!-- Notification Form -->
@@ -188,9 +122,14 @@
                     <h3 class="font-bold text-lg mb-1">Get Notified</h3>
                     <p class="text-zinc-400 text-xs mb-4">Email alerts when I go live.</p>
 
-                    <!-- Form -->
-                    <form id="formContainer" onsubmit="submitEmail(event)" class="flex flex-col gap-3">
-                        <input type="email" id="emailInput" placeholder="Enter email..." class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 transition-colors text-white">
+                    <!-- Form with Formspree -->
+                    <form 
+                        id="my-form"
+                        action="https://formspree.io/f/xvgewpln" 
+                        method="POST"
+                        class="flex flex-col gap-3"
+                    >
+                        <input type="email" name="email" id="emailInput" required placeholder="Enter email..." class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 transition-colors text-white">
                         <button type="submit" id="submitBtn" class="w-full bg-white text-black font-bold text-sm py-3 rounded-xl hover:bg-zinc-200 transition-colors">Notify Me</button>
                     </form>
 
@@ -199,6 +138,7 @@
                         <i data-lucide="check-circle-2" class="w-6 h-6"></i>
                         <span class="font-semibold text-sm">You're on the list!</span>
                     </div>
+                     <div id="errorMsg" class="hidden text-red-400 text-xs mt-2">Oops! Something went wrong.</div>
                 </div>
             </div>
         </div>
@@ -209,7 +149,7 @@
 
     </main>
 
-    <!-- Icons Init & Logic -->
+    <!-- Logic -->
     <script>
         // Initialize Icons
         lucide.createIcons();
@@ -224,6 +164,47 @@
                 btn.innerText = originalText;
             }, 2000);
         }
+
+        // Handle Formspree Submission without redirect
+        var form = document.getElementById("my-form");
+        
+        async function handleSubmit(event) {
+            event.preventDefault();
+            var status = document.getElementById("successMsg");
+            var error = document.getElementById("errorMsg");
+            var btn = document.getElementById("submitBtn");
+            var input = document.getElementById("emailInput");
+            
+            var data = new FormData(event.target);
+            
+            btn.innerHTML = "Sending...";
+            btn.disabled = true;
+
+            fetch(event.target.action, {
+                method: form.method,
+                body: data,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            }).then(response => {
+                if (response.ok) {
+                    form.classList.add('hidden');
+                    status.classList.remove('hidden');
+                    status.classList.add('flex');
+                } else {
+                    response.json().then(data => {
+                        error.classList.remove('hidden');
+                        btn.innerHTML = "Notify Me";
+                        btn.disabled = false;
+                    })
+                }
+            }).catch(error => {
+                error.classList.remove('hidden');
+                btn.innerHTML = "Notify Me";
+                btn.disabled = false;
+            });
+        }
+        form.addEventListener("submit", handleSubmit);
     </script>
 </body>
 </html>
