@@ -5,18 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VectorPunk1 | Portal</title>
     
-    <!-- Tailwind CSS (Styling) -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- Custom Animations -->
     <style>
         @keyframes float { 0%, 100% { transform: translate(0, 0px); } 50% { transform: translate(0, -20px); } }
         @keyframes pulse-slow { 0%, 100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.05); } }
         @keyframes fade-in-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         
+        /* NEW: Shine/Glow Animation for the Text */
+        @keyframes shine {
+            0% { background-position: -200% center; }
+            100% { background-position: 200% center; }
+        }
+
         .animate-float { animation: float 8s ease-in-out infinite; }
         .animate-pulse-slow { animation: pulse-slow 6s ease-in-out infinite; }
         .animate-enter { animation: fade-in-up 1s ease-out forwards; opacity: 0; }
@@ -24,6 +27,21 @@
         .delay-200 { animation-delay: 200ms; }
         .delay-300 { animation-delay: 300ms; }
         
+        /* NEW: Class for the glowing text effect */
+        .text-glow-anim {
+            background: linear-gradient(
+                to right,
+                #6b7280 20%, /* Darker Grey (Start) */
+                #ffffff 50%, /* Bright White (The Glow) */
+                #6b7280 80%  /* Darker Grey (End) */
+            );
+            background-size: 200% auto;
+            color: transparent;
+            -webkit-background-clip: text;
+            background-clip: text;
+            animation: shine 3s linear infinite;
+        }
+
         body { background-color: #000; color: white; }
         .glass-card {
             background: rgba(255, 255, 255, 0.05);
@@ -35,7 +53,6 @@
 </head>
 <body class="min-h-screen overflow-x-hidden selection:bg-indigo-500/30">
 
-    <!-- Background -->
     <div class="fixed inset-0 z-0">
         <div class="absolute top-[-10%] left-[-10%] w-[300px] h-[300px] bg-indigo-600/30 rounded-full blur-[100px] animate-pulse-slow"></div>
         <div class="absolute bottom-[-10%] right-[-10%] w-[300px] h-[300px] bg-purple-600/30 rounded-full blur-[100px] animate-pulse-slow"></div>
@@ -43,28 +60,29 @@
         <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"></div>
     </div>
 
-    <!-- Main Content -->
     <main class="relative z-10 min-h-screen flex flex-col items-center justify-center p-6">
         
-        <!-- Profile Section -->
         <div class="flex flex-col items-center text-center mb-10 animate-enter">
             <div class="relative mb-6 group">
                 <div class="absolute inset-0 rounded-full bg-indigo-500 opacity-40 blur-xl"></div>
-                <!-- YOUR ONE PIECE PIC IS HERE -->
                 <img src="https://i.ibb.co/p6VrwYzs/webvec1jpg.jpg" alt="VectorPunk1 Avatar" class="relative w-32 h-32 rounded-full border-4 border-black shadow-2xl object-cover bg-zinc-900">
             </div>
-            <h1 class="text-4xl font-bold tracking-tight mb-2">vectorpunk1</h1>
-            <p class="text-zinc-400 font-medium">Content Creator. Streamer. Gamer.</p>
             
-            <button onclick="copyLink()" id="shareBtn" class="mt-6 flex items-center gap-2 text-sm font-medium text-zinc-500 hover:text-white py-2 px-4 rounded-full glass-card transition-all">
+            <h1 class="text-3xl md:text-4xl font-light tracking-[0.3em] uppercase mb-3 text-glow-anim font-sans">
+                VECTORPUNK
+            </h1>
+            
+            <p class="text-zinc-500 text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase">
+                GAMER &bull; STREAMER &bull; CREATOR
+            </p>
+            
+            <button onclick="copyLink()" id="shareBtn" class="mt-8 flex items-center gap-2 text-sm font-medium text-zinc-500 hover:text-white py-2 px-4 rounded-full glass-card transition-all">
                 <i data-lucide="share-2" class="w-4 h-4"></i>
                 <span id="shareText">Share Profile</span>
             </button>
         </div>
 
-        <!-- Links -->
         <div class="w-full max-w-md flex flex-col gap-4 animate-enter delay-100">
-            <!-- Twitch -->
             <a href="https://twitch.tv/vectorpunk?sr=a" target="_blank" class="glass-card p-4 rounded-2xl flex items-center gap-4 hover:bg-white/10 transition-all group">
                 <div class="w-12 h-12 rounded-xl bg-black/40 flex items-center justify-center border border-white/10">
                     <i data-lucide="twitch" class="text-purple-400 w-6 h-6 group-hover:scale-110 transition-transform"></i>
@@ -76,7 +94,6 @@
                 <i data-lucide="external-link" class="text-zinc-600 w-4 h-4"></i>
             </a>
 
-            <!-- Discord -->
             <a href="https://discord.gg/2gQdKUhv8" target="_blank" class="glass-card p-4 rounded-2xl flex items-center gap-4 hover:bg-white/10 transition-all group">
                 <div class="w-12 h-12 rounded-xl bg-black/40 flex items-center justify-center border border-white/10">
                     <i data-lucide="message-circle" class="text-indigo-400 w-6 h-6 group-hover:scale-110 transition-transform"></i>
@@ -88,7 +105,6 @@
                 <i data-lucide="external-link" class="text-zinc-600 w-4 h-4"></i>
             </a>
 
-            <!-- YouTube -->
             <a href="https://youtube.com/@vectorpunk1?si=X6kyhLuZRLyP96ne" target="_blank" class="glass-card p-4 rounded-2xl flex items-center gap-4 hover:bg-white/10 transition-all group">
                 <div class="w-12 h-12 rounded-xl bg-black/40 flex items-center justify-center border border-white/10">
                     <i data-lucide="youtube" class="text-red-500 w-6 h-6 group-hover:scale-110 transition-transform"></i>
@@ -100,7 +116,6 @@
                 <i data-lucide="external-link" class="text-zinc-600 w-4 h-4"></i>
             </a>
 
-            <!-- Instagram -->
             <a href="https://www.instagram.com/vectorpunk1?igsh=MXF1am1jM3N1eHA0Nw==" target="_blank" class="glass-card p-4 rounded-2xl flex items-center gap-4 hover:bg-white/10 transition-all group">
                 <div class="w-12 h-12 rounded-xl bg-black/40 flex items-center justify-center border border-white/10">
                     <i data-lucide="instagram" class="text-pink-500 w-6 h-6 group-hover:scale-110 transition-transform"></i>
@@ -112,7 +127,6 @@
                 <i data-lucide="external-link" class="text-zinc-600 w-4 h-4"></i>
             </a>
             
-            <!-- DONATION SECTION (UPI QR Code) -->
             <div class="mt-2">
                 <button onclick="toggleDonate()" class="w-full glass-card p-4 rounded-2xl flex items-center justify-between hover:bg-white/10 transition-all group">
                     <div class="flex items-center gap-4">
@@ -127,11 +141,9 @@
                     <i data-lucide="chevron-down" id="donateIcon" class="text-zinc-500 w-5 h-5 transition-transform"></i>
                 </button>
                 
-                <!-- Hidden QR Container -->
                 <div id="donateSection" class="hidden glass-card mt-2 p-6 rounded-2xl text-center border-t-0">
                     <p class="text-sm text-zinc-300 mb-4">Scan to support the channel! 🚀</p>
                     <div class="relative mx-auto w-48 h-48 bg-white p-2 rounded-xl">
-                        <!-- UPI QR CODE LINK INSERTED HERE -->
                         <img src="https://i.ibb.co/v4NV5R3v/vecupijpg.jpg" alt="UPI QR Code" class="w-full h-full object-contain">
                     </div>
                     <p class="text-xs text-zinc-500 mt-4">Thank you for the support!</p>
@@ -140,7 +152,6 @@
 
         </div>
 
-        <!-- Notification Form -->
         <div class="w-full max-w-md mt-8 animate-enter delay-200">
             <div class="glass-card rounded-3xl p-6 text-center relative overflow-hidden">
                 <div class="relative z-10">
@@ -150,7 +161,6 @@
                     <h3 class="font-bold text-lg mb-1">Get Notified</h3>
                     <p class="text-zinc-400 text-xs mb-4">Email alerts when I go live.</p>
 
-                    <!-- Form with Formspree -->
                     <form 
                         id="my-form"
                         action="https://formspree.io/f/xvgewpln" 
@@ -176,7 +186,6 @@
 
     </main>
 
-    <!-- Logic -->
     <script>
         // Initialize Icons
         lucide.createIcons();
