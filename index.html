@@ -53,7 +53,7 @@
             transition: all 0.3s ease;
         }
 
-        /* Minimal button style to fit inside the card */
+        /* Minimal button style */
         .card-btn {
             background: rgba(0, 0, 0, 0.4);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -86,10 +86,15 @@
         <div id="header-container" class="relative flex flex-col items-center text-center mb-6 animate-enter glass-card p-8 rounded-3xl border-transparent transition-all w-full max-w-md">
             
             <div class="absolute top-4 left-4 flex flex-col gap-2 z-20">
-                <button onclick="triggerGlyph()" class="card-btn w-8 h-8 rounded-full flex items-center justify-center font-serif italic text-sm">
+                <button onclick="triggerGlyph()" class="card-btn w-8 h-8 rounded-full flex items-center justify-center font-serif italic text-sm" title="Sound Check">
                     &pi;
                 </button>
-                <button onclick="copyLink()" id="shareBtn" class="card-btn w-8 h-8 rounded-full flex items-center justify-center">
+                
+                <a href="robot-runner.html" target="_blank" class="card-btn w-8 h-8 rounded-full flex items-center justify-center group" title="Play Robot Run">
+                    <i data-lucide="bot" class="w-4 h-4 group-hover:text-cyan-400 transition-colors"></i>
+                </a>
+
+                <button onclick="copyLink()" id="shareBtn" class="card-btn w-8 h-8 rounded-full flex items-center justify-center" title="Share">
                     <i data-lucide="share-2" class="w-3 h-3"></i>
                 </button>
             </div>
@@ -273,7 +278,7 @@
             osc.stop(audioCtx.currentTime + 0.4);
         }
 
-        // Draw Waveform (Only visible when isActive is true)
+        // Draw Waveform
         function drawWaveform() {
             if (!isActive) return;
 
@@ -316,30 +321,24 @@
             const links = document.getElementById('links-container');
             const vizContainer = document.getElementById('viz-container');
 
-            // Reset animation
             header.classList.remove('glyph-lit');
             links.classList.remove('glyph-lit');
             vizContainer.classList.remove('glyph-lit');
             
-            void header.offsetWidth; // Trigger reflow
+            void header.offsetWidth; 
 
-            // Add animation class
             header.classList.add('glyph-lit');
             links.classList.add('glyph-lit');
             vizContainer.classList.add('glyph-lit');
         }
 
-        // --- FIXED COPY LINK FUNCTION ---
         function copyLink() {
             const url = window.location.href;
-            
-            // Method 1: Modern API (Secure Contexts)
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(url)
                     .then(() => showSuccess())
                     .catch(() => fallbackCopy(url));
             } else {
-                // Method 2: Fallback for local files/older browsers
                 fallbackCopy(url);
             }
         }
@@ -356,12 +355,7 @@
                 
                 const successful = document.execCommand('copy');
                 document.body.removeChild(textArea);
-                
-                if (successful) {
-                    showSuccess();
-                } else {
-                    alert("Copy failed. Please copy the URL manually.");
-                }
+                if (successful) showSuccess();
             } catch (err) {
                 alert("Copy failed. Please copy the URL manually.");
             }
@@ -371,11 +365,8 @@
             if (navigator.vibrate) navigator.vibrate(50);
             const btn = document.querySelector('#shareBtn');
             const originalHTML = btn.innerHTML;
-            
-            // Change icon to check
             btn.innerHTML = `<i data-lucide="check" class="w-3 h-3 text-green-400"></i>`;
             lucide.createIcons();
-            
             setTimeout(() => {
                 btn.innerHTML = originalHTML;
                 lucide.createIcons();
