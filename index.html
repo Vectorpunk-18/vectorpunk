@@ -39,7 +39,7 @@
             position: absolute;
             width: 4px;
             height: 4px;
-            background-color: #444;
+            background-color: #555; /* Made slightly brighter to be visible when off */
             border-radius: 50%;
             transition: transform 0.05s ease, background-color 0.2s ease;
         }
@@ -84,7 +84,7 @@
         <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"></div>
     </div>
 
-    <!-- TOP LEFT BUTTONS -->
+    <!-- TOP LEFT BUTTONS (Music, Reddit, Share) -->
     <div class="absolute top-6 left-6 z-50 flex flex-col gap-3">
         
         <!-- 1. Music Player -->
@@ -105,7 +105,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white group-hover:text-orange-500 transition-colors"><circle cx="12" cy="12" r="10"></circle><path d="M17 13c0 1.5-2.5 3-5 3s-5-1.5-5-3"></path><line x1="8.5" y1="9.5" x2="8.5" y2="9.5"></line><line x1="15.5" y1="9.5" x2="15.5" y2="9.5"></line><line x1="12" y1="2" x2="12" y2="12"></line><line x1="12" y1="2" x2="17" y2="4"></line><circle cx="17" cy="4" r="1" fill="currentColor"></circle></svg>
         </a>
 
-        <!-- 3. Share Button (Fixed) -->
+        <!-- 3. Share Button -->
         <button onclick="copyLink()" id="shareBtn" class="w-9 h-9 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-lg transition-all active:scale-95 group hover:bg-blue-500/20 hover:border-blue-500">
             <!-- INLINE SVG: Share -->
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="shareIcon" class="text-white transition-colors"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg>
@@ -311,4 +311,4 @@
         const btn = document.getElementById("musicBtn");
         const icon = document.getElementById("musicIcon");
         const dotContainer = document.getElementById('glyphRing');
-        const visualizerContainer = document.getElementById('google-viz');
+        
