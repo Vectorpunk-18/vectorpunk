@@ -89,8 +89,10 @@
         
         <!-- 1. Music Player -->
         <div class="relative">
+            <!-- Tries to play your file, falls back to a cool default song if missing -->
             <audio id="bgMusic" crossorigin="anonymous" onerror="this.src='https://cdn.pixabay.com/download/audio/2022/11/22/audio_febc508520.mp3'">
                 <source src="current_music.mp3" type="audio/mpeg">
+                <source src="https://cdn.pixabay.com/download/audio/2022/11/22/audio_febc508520.mp3" type="audio/mpeg">
             </audio>
             <button onclick="initAudioAndPlay()" id="musicBtn" class="w-9 h-9 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-lg transition-all active:scale-95 group">
                 <span id="musicIcon" class="text-white text-lg font-serif italic font-light leading-none pt-0.5 transition-colors">π</span>
@@ -103,7 +105,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white group-hover:text-orange-500 transition-colors"><circle cx="12" cy="12" r="10"></circle><path d="M17 13c0 1.5-2.5 3-5 3s-5-1.5-5-3"></path><line x1="8.5" y1="9.5" x2="8.5" y2="9.5"></line><line x1="15.5" y1="9.5" x2="15.5" y2="9.5"></line><line x1="12" y1="2" x2="12" y2="12"></line><line x1="12" y1="2" x2="17" y2="4"></line><circle cx="17" cy="4" r="1" fill="currentColor"></circle></svg>
         </a>
 
-        <!-- 3. Share Button -->
+        <!-- 3. Share Button (Fixed) -->
         <button onclick="copyLink()" id="shareBtn" class="w-9 h-9 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-lg transition-all active:scale-95 group hover:bg-blue-500/20 hover:border-blue-500">
             <!-- INLINE SVG: Share -->
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="shareIcon" class="text-white transition-colors"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg>
@@ -157,7 +159,7 @@
             <!-- Discord -->
             <a href="https://discord.gg/2gQdKUhv8" target="_blank" class="glass-card p-4 rounded-2xl flex items-center gap-4 hover:bg-white/10 transition-all group">
                 <div class="w-12 h-12 rounded-xl bg-black/40 flex items-center justify-center border border-white/10">
-                    <!-- INLINE SVG: Discord (Message Circle Fallback) -->
+                    <!-- INLINE SVG: Discord -->
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-400 w-6 h-6 group-hover:scale-110 transition-transform"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
                 </div>
                 <div class="flex-1 min-w-0">
@@ -260,6 +262,49 @@
 
     <!-- Logic -->
     <script>
+        // BULLETPROOF COPY LINK FUNCTION
+        function copyLink() {
+            const url = window.location.href;
+            
+            // Try Modern Method
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url).then(() => {
+                    showCopySuccess();
+                }).catch(() => {
+                    fallbackCopy(url);
+                });
+            } else {
+                fallbackCopy(url);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed"; 
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                showCopySuccess();
+            } catch (err) {
+                alert("Could not copy automatically. Please copy from address bar.");
+            }
+            
+            document.body.removeChild(textArea);
+        }
+
+        function showCopySuccess() {
+            const btn = document.getElementById('shareIcon');
+            // Haptic Feedback
+            if (navigator.vibrate) navigator.vibrate(50);
+            // Visual Feedback
+            btn.style.color = "#4ade80"; 
+            setTimeout(() => { btn.style.color = "white"; }, 1500);
+        }
+
         // --- AUDIO VISUALIZER ENGINE ---
         let audioContext, analyser, source, animationId;
         const audio = document.getElementById('bgMusic');
@@ -267,47 +312,3 @@
         const icon = document.getElementById("musicIcon");
         const dotContainer = document.getElementById('glyphRing');
         const visualizerContainer = document.getElementById('google-viz');
-        
-        let isAudioInit = false;
-        let musicTimer;
-
-        // 1. GENERATE UI ELEMENTS
-        const dotCount = 36;
-        const radius = 70; 
-        const dots = [];
-        for (let i = 0; i < dotCount; i++) {
-            const dot = document.createElement('div');
-            dot.className = 'g-dot';
-            dot.style.width = '3px';
-            dot.style.height = '3px';
-            const angle = (i / dotCount) * (2 * Math.PI);
-            const x = Math.cos(angle) * radius;
-            const y = Math.sin(angle) * radius;
-            dot.style.left = `calc(50% + ${x}px)`;
-            dot.style.top = `calc(50% + ${y}px)`;
-            dotContainer.appendChild(dot);
-            dots.push(dot);
-        }
-
-        const barCount = 20;
-        const bars = [];
-        for(let i=0; i<barCount; i++) {
-            const bar = document.createElement('div');
-            bar.className = 'freq-bar';
-            visualizerContainer.appendChild(bar);
-            bars.push(bar);
-        }
-
-        // 2. AUDIO INITIALIZATION
-        function initAudioAndPlay() {
-            if (!isAudioInit) {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                audioContext = new AudioContext();
-                analyser = audioContext.createAnalyser();
-                source = audioContext.createMediaElementSource(audio);
-                source.connect(analyser);
-                analyser.connect(audioContext.destination);
-                analyser.fftSize = 64; 
-                isAudioInit = true;
-            }
-            if (audioContext.state === 'suspended') { audioContext.resume(); }
