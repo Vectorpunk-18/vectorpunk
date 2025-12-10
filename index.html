@@ -5,61 +5,151 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VectorPunk1 | Portal</title>
     
-    <!-- Tailwind CSS (Styling) -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- Custom Animations -->
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Codystar:wght@400&family=Rajdhani:wght@600&display=swap" rel="stylesheet">
+
     <style>
-        @keyframes float { 0%, 100% { transform: translate(0, 0px); } 50% { transform: translate(0, -20px); } }
-        @keyframes pulse-slow { 0%, 100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.05); } }
+        /* Fonts */
+        .font-dots { font-family: 'Codystar', sans-serif; font-weight: 400; }
+        .font-tech { font-family: 'Rajdhani', sans-serif; font-weight: 600; }
+
+        /* Text Shimmer */
+        @keyframes shimmer {
+            0% { background-position: -200% center; }
+            100% { background-position: 200% center; }
+        }
+        .text-shimmer {
+            background: linear-gradient(to right, #999 20%, #fff 50%, #999 80%);
+            background-size: 200% auto;
+            color: #fff;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 3s linear infinite;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+
+        /* --- GLYPH RING (Around Profile) --- */
+        .g-dot {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background-color: #444;
+            border-radius: 50%;
+            transition: transform 0.05s ease, background-color 0.1s ease;
+        }
+
+        /* --- GOOGLE-STYLE FREQUENCY BAR --- */
+        #google-viz {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            height: 40px; /* Max height area */
+            margin-top: 15px;
+        }
+
+        .freq-bar {
+            width: 4px;
+            height: 4px; /* Min height */
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 99px; /* Capsule shape */
+            transition: height 0.05s ease, background-color 0.1s ease;
+        }
+
+        /* Standard Animations */
         @keyframes fade-in-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .animate-float { animation: float 8s ease-in-out infinite; }
-        .animate-pulse-slow { animation: pulse-slow 6s ease-in-out infinite; }
         .animate-enter { animation: fade-in-up 1s ease-out forwards; opacity: 0; }
         .delay-100 { animation-delay: 100ms; }
-        .delay-200 { animation-delay: 200ms; }
-        .delay-300 { animation-delay: 300ms; }
         
-        body { background-color: #000; color: white; }
+        body { background-color: #000; color: white; overflow-x: hidden; }
         .glass-card {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
     </style>
 </head>
-<body class="min-h-screen overflow-x-hidden selection:bg-indigo-500/30">
+<body class="min-h-screen selection:bg-indigo-500/30 relative">
 
     <!-- Background -->
     <div class="fixed inset-0 z-0">
-        <div class="absolute top-[-10%] left-[-10%] w-[300px] h-[300px] bg-indigo-600/30 rounded-full blur-[100px] animate-pulse-slow"></div>
-        <div class="absolute bottom-[-10%] right-[-10%] w-[300px] h-[300px] bg-purple-600/30 rounded-full blur-[100px] animate-pulse-slow"></div>
-        <div class="absolute top-[40%] left-[50%] translate-x-[-50%] w-[200px] h-[200px] bg-pink-600/20 rounded-full blur-[80px] animate-float"></div>
+        <div class="absolute top-[-10%] left-[-10%] w-[300px] h-[300px] bg-indigo-600/30 rounded-full blur-[100px] animate-pulse"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[300px] h-[300px] bg-purple-600/30 rounded-full blur-[100px] animate-pulse"></div>
         <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"></div>
     </div>
 
+    <!-- TOP LEFT BUTTONS -->
+    <div class="absolute top-6 left-6 z-50 flex flex-col gap-3">
+        <!-- 1. Music Player -->
+        <div class="relative">
+            <!-- AUDIO SOURCE POINTING TO "current_music.mp3" -->
+            <!-- Fallback to demo song if file not found -->
+            <audio id="bgMusic" crossorigin="anonymous" onerror="this.src='https://cdn.pixabay.com/download/audio/2022/11/22/audio_febc508520.mp3'">
+                <source src="current_music.mp3" type="audio/mpeg">
+            </audio>
+            <button onclick="initAudioAndPlay()" id="musicBtn" class="w-9 h-9 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-lg transition-all active:scale-95 group">
+                <span id="musicIcon" class="text-white text-lg font-serif italic font-light leading-none pt-0.5 transition-colors">π</span>
+            </button>
+        </div>
+        
+        <!-- 2. Reddit -->
+        <a href="https://www.reddit.com/u/Narrow-Permission-68/s/ijn8yagtAN" target="_blank" class="w-9 h-9 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-lg transition-all active:scale-95 group hover:bg-orange-500/20 hover:border-orange-500">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white group-hover:text-orange-500 transition-colors">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M17 13c0 1.5-2.5 3-5 3s-5-1.5-5-3"></path>
+                <line x1="8.5" y1="9.5" x2="8.5" y2="9.5"></line>
+                <line x1="15.5" y1="9.5" x2="15.5" y2="9.5"></line>
+                <line x1="12" y1="2" x2="12" y2="12"></line>
+                <line x1="12" y1="2" x2="17" y2="4"></line>
+                <circle cx="17" cy="4" r="1" fill="currentColor"></circle>
+            </svg>
+        </a>
+
+        <!-- 3. Share Button -->
+        <button onclick="copyLink()" id="shareBtn" class="w-9 h-9 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-lg transition-all active:scale-95 group hover:bg-blue-500/20 hover:border-blue-500">
+            <i data-lucide="share-2" id="shareIcon" class="text-white w-4 h-4 transition-colors"></i>
+        </button>
+    </div>
+
     <!-- Main Content -->
-    <main class="relative z-10 min-h-screen flex flex-col items-center justify-center p-6">
+    <main class="relative z-10 min-h-screen flex flex-col items-center justify-center p-6 pb-24">
         
         <!-- Profile Section -->
-        <div class="flex flex-col items-center text-center mb-10 animate-enter">
-            <div class="relative mb-6 group">
-                <div class="absolute inset-0 rounded-full bg-indigo-500 opacity-40 blur-xl"></div>
-                <!-- YOUR ONE PIECE PIC IS HERE -->
-                <img src="https://i.ibb.co/p6VrwYzs/webvec1jpg.jpg" alt="VectorPunk1 Avatar" class="relative w-32 h-32 rounded-full border-4 border-black shadow-2xl object-cover bg-zinc-900">
-            </div>
-            <h1 class="text-4xl font-bold tracking-tight mb-2">vectorpunk1</h1>
-            <p class="text-zinc-400 font-medium">Content Creator. Streamer. Gamer.</p>
+        <div class="flex flex-col items-center text-center mb-8 animate-enter">
             
-            <button onclick="copyLink()" id="shareBtn" class="mt-6 flex items-center gap-2 text-sm font-medium text-zinc-500 hover:text-white py-2 px-4 rounded-full glass-card transition-all">
-                <i data-lucide="share-2" class="w-4 h-4"></i>
-                <span id="shareText">Share Profile</span>
-            </button>
+            <!-- AVATAR CONTAINER WITH GLYPHS -->
+            <div class="relative mb-6 w-32 h-32 flex items-center justify-center">
+                <!-- JS will inject dots here -->
+                <div id="glyphRing" class="absolute inset-0 pointer-events-none"></div>
+
+                <div class="absolute inset-0 rounded-full bg-indigo-500 opacity-40 blur-xl"></div>
+                <!-- PROFILE PIC -->
+                <img src="https://i.ibb.co/p6VrwYzs/webvec1jpg.jpg" alt="VectorPunk1 Avatar" class="relative z-10 w-full h-full rounded-full border-4 border-black shadow-2xl object-cover bg-zinc-900">
+            </div>
+            
+            <!-- NAME -->
+            <h1 class="text-3xl font-dots font-bold tracking-widest mb-1 uppercase text-shimmer">
+                VECTORPUNK<sup style="font-size: 0.6em; vertical-align: top;">1</sup>
+            </h1>
+            
+            <!-- DESCRIPTION -->
+            <p class="text-zinc-400 font-tech text-xs tracking-widest uppercase border-t border-zinc-800/50 pt-2 px-4 mb-2">
+                Gamer • Streamer • Creator
+            </p>
+
+            <!-- GOOGLE STYLE VISUALIZER (Below Description) -->
+            <div id="google-viz">
+                <!-- JS generates bars here -->
+            </div>
         </div>
 
         <!-- Links -->
@@ -111,8 +201,8 @@
                 </div>
                 <i data-lucide="external-link" class="text-zinc-600 w-4 h-4"></i>
             </a>
-            
-            <!-- DONATION SECTION (UPI QR Code) -->
+
+            <!-- DONATION SECTION (UPI) -->
             <div class="mt-2">
                 <button onclick="toggleDonate()" class="w-full glass-card p-4 rounded-2xl flex items-center justify-between hover:bg-white/10 transition-all group">
                     <div class="flex items-center gap-4">
@@ -127,11 +217,9 @@
                     <i data-lucide="chevron-down" id="donateIcon" class="text-zinc-500 w-5 h-5 transition-transform"></i>
                 </button>
                 
-                <!-- Hidden QR Container -->
                 <div id="donateSection" class="hidden glass-card mt-2 p-6 rounded-2xl text-center border-t-0">
                     <p class="text-sm text-zinc-300 mb-4">Scan to support the channel! 🚀</p>
                     <div class="relative mx-auto w-48 h-48 bg-white p-2 rounded-xl">
-                        <!-- UPI QR CODE LINK INSERTED HERE -->
                         <img src="https://i.ibb.co/v4NV5R3v/vecupijpg.jpg" alt="UPI QR Code" class="w-full h-full object-contain">
                     </div>
                     <p class="text-xs text-zinc-500 mt-4">Thank you for the support!</p>
@@ -150,7 +238,6 @@
                     <h3 class="font-bold text-lg mb-1">Get Notified</h3>
                     <p class="text-zinc-400 text-xs mb-4">Email alerts when I go live.</p>
 
-                    <!-- Form with Formspree -->
                     <form 
                         id="my-form"
                         action="https://formspree.io/f/xvgewpln" 
@@ -178,72 +265,142 @@
 
     <!-- Logic -->
     <script>
-        // Initialize Icons
         lucide.createIcons();
 
-        // Copy Link Function
-        function copyLink() {
-            navigator.clipboard.writeText(window.location.href);
-            const btn = document.getElementById('shareText');
-            const originalText = btn.innerText;
-            btn.innerText = "Copied!";
-            setTimeout(() => {
-                btn.innerText = originalText;
-            }, 2000);
+        // --- AUDIO VISUALIZER ENGINE ---
+        let audioContext, analyser, source, animationId;
+        const audio = document.getElementById('bgMusic');
+        const btn = document.getElementById("musicBtn");
+        const icon = document.getElementById("musicIcon");
+        const dotContainer = document.getElementById('glyphRing');
+        const visualizerContainer = document.getElementById('google-viz');
+        
+        let isAudioInit = false;
+        let musicTimer;
+
+        // 1. GENERATE UI ELEMENTS
+        
+        // A. GLYPH RING (36 Dots)
+        const dotCount = 36;
+        const radius = 70; 
+        const dots = [];
+        for (let i = 0; i < dotCount; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'g-dot';
+            dot.style.width = '3px';
+            dot.style.height = '3px';
+            const angle = (i / dotCount) * (2 * Math.PI);
+            const x = Math.cos(angle) * radius;
+            const y = Math.sin(angle) * radius;
+            dot.style.left = `calc(50% + ${x}px)`;
+            dot.style.top = `calc(50% + ${y}px)`;
+            dotContainer.appendChild(dot);
+            dots.push(dot);
         }
 
-        // Toggle Donation Section
-        function toggleDonate() {
-            const section = document.getElementById('donateSection');
-            const icon = document.getElementById('donateIcon');
-            section.classList.toggle('hidden');
-            
-            if (section.classList.contains('hidden')) {
-                icon.style.transform = 'rotate(0deg)';
+        // B. GOOGLE STYLE VISUALIZER (20 Bars)
+        const barCount = 20;
+        const bars = [];
+        for(let i=0; i<barCount; i++) {
+            const bar = document.createElement('div');
+            bar.className = 'freq-bar';
+            visualizerContainer.appendChild(bar);
+            bars.push(bar);
+        }
+
+        // 2. AUDIO INITIALIZATION
+        function initAudioAndPlay() {
+            if (!isAudioInit) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioContext = new AudioContext();
+                analyser = audioContext.createAnalyser();
+                source = audioContext.createMediaElementSource(audio);
+                source.connect(analyser);
+                analyser.connect(audioContext.destination);
+                analyser.fftSize = 64; 
+                isAudioInit = true;
+            }
+            if (audioContext.state === 'suspended') { audioContext.resume(); }
+            toggleMusicState();
+        }
+
+        function toggleMusicState() {
+            if (audio.paused) {
+                audio.play();
+                renderFrame(); 
+                btn.classList.add("ring-2", "ring-green-400", "animate-pulse");
+                icon.style.color = "#4ade80"; 
+                musicTimer = setTimeout(() => { stopMusic() }, 30000);
             } else {
-                icon.style.transform = 'rotate(180deg)';
+                stopMusic();
             }
         }
 
-        // Handle Formspree Submission without redirect
-        var form = document.getElementById("my-form");
-        
-        async function handleSubmit(event) {
-            event.preventDefault();
-            var status = document.getElementById("successMsg");
-            var error = document.getElementById("errorMsg");
-            var btn = document.getElementById("submitBtn");
+        function stopMusic() {
+            audio.pause();
+            audio.currentTime = 0;
+            cancelAnimationFrame(animationId);
+            clearTimeout(musicTimer);
+            btn.classList.remove("ring-2", "ring-green-400", "animate-pulse");
+            icon.style.color = "white";
             
-            var data = new FormData(event.target);
-            
-            btn.innerHTML = "Sending...";
-            btn.disabled = true;
+            // Reset Visuals
+            dots.forEach(d => { d.style.transform = `scale(1)`; d.style.backgroundColor = '#444'; });
+            bars.forEach(b => { b.style.height = '4px'; b.style.backgroundColor = 'rgba(255,255,255,0.2)'; });
+        }
 
-            fetch(event.target.action, {
-                method: form.method,
-                body: data,
-                headers: {
-                    'Accept': 'application/json'
-                }
-            }).then(response => {
-                if (response.ok) {
-                    form.classList.add('hidden');
-                    status.classList.remove('hidden');
-                    status.classList.add('flex');
+        // 3. ANIMATION LOOP
+        function renderFrame() {
+            animationId = requestAnimationFrame(renderFrame);
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            analyser.getByteFrequencyData(dataArray);
+
+            // A. UPDATE FREQUENCY BARS (Google Style)
+            for (let i = 0; i < barCount; i++) {
+                const index = Math.floor(i * (bufferLength / barCount));
+                const value = dataArray[index];
+                // Height between 4px and 40px
+                const height = Math.max(4, (value / 255) * 40); 
+                bars[i].style.height = `${height}px`;
+                
+                // Active color
+                if(value > 100) bars[i].style.backgroundColor = 'white';
+                else bars[i].style.backgroundColor = 'rgba(255,255,255,0.2)';
+            }
+
+            // B. UPDATE GLYPH RING (React to Bass)
+            let bassSum = 0;
+            for(let i=0; i<5; i++) { bassSum += dataArray[i]; }
+            const bassAvg = bassSum / 5;
+            const scale = 1 + (bassAvg / 300); // Subtle pulse scale
+            
+            dots.forEach((dot, index) => {
+                const time = Date.now() / 150;
+                const wave = Math.sin((index * 0.5) - time); // Spinning wave
+                
+                if (bassAvg > 120) { // On beat
+                    dot.style.backgroundColor = '#fff';
+                    dot.style.boxShadow = `0 0 8px white`;
+                    dot.style.transform = `scale(${scale * (1 + (wave * 0.3))})`; 
                 } else {
-                    response.json().then(data => {
-                        error.classList.remove('hidden');
-                        btn.innerHTML = "Notify Me";
-                        btn.disabled = false;
-                    })
+                    dot.style.backgroundColor = '#444';
+                    dot.style.boxShadow = 'none';
+                    dot.style.transform = `scale(1)`;
                 }
-            }).catch(error => {
-                error.classList.remove('hidden');
-                btn.innerHTML = "Notify Me";
-                btn.disabled = false;
             });
         }
-        form.addEventListener("submit", handleSubmit);
-    </script>
-</body>
-</html>
+
+        // Copy Link
+        function copyLink() {
+            navigator.clipboard.writeText(window.location.href);
+            const btn = document.getElementById('shareIcon');
+            const originalColor = btn.style.color;
+            btn.style.color = "#4ade80"; // Green
+            setTimeout(() => { btn.style.color = "white"; }, 1000);
+        }
+
+        // Toggle Donation
+        function toggleDonate() {
+            const section = document.getElementById('donateSection');
+            const icon = document.getElement
