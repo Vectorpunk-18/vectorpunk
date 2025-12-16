@@ -3,473 +3,353 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neon Defiance</title>
+    <title>Casio fx-991ES Sim</title>
     <style>
+        /* --- FONTS & RESETS --- */
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&family=Roboto:wght@400;700&display=swap');
+
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
         body {
             margin: 0;
-            background: #000;
-            overflow: hidden;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            user-select: none;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #e0e0e0;
+            font-family: 'Roboto', sans-serif;
         }
 
-        /* UI Overlay */
-        #ui-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
+        /* --- CALCULATOR BODY --- */
+        .calculator {
+            width: 380px;
+            height: 740px;
+            background: linear-gradient(180deg, #d8d9db 0%, #c4c5c7 100%);
+            border-radius: 30px;
+            box-shadow: 
+                0 30px 60px -10px rgba(0,0,0,0.4),
+                inset 0 2px 4px rgba(255,255,255,0.8),
+                inset 0 -2px 5px rgba(0,0,0,0.1);
+            padding: 25px 20px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* --- BRANDING --- */
+        .brand-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 15px;
+            padding: 0 10px;
+        }
+        .brand-logo { font-weight: 700; font-size: 1.2rem; color: #444; letter-spacing: 1px; }
+        .model-name { font-family: 'Roboto', sans-serif; font-style: italic; font-weight: 700; color: #333; }
+        .solar-panel {
+            width: 120px; height: 35px;
+            background: #4a3b2a;
+            border-radius: 4px;
+            border: 2px solid #999;
+            background-image: repeating-linear-gradient(90deg, transparent 0, transparent 19px, #66523a 20px);
+            opacity: 0.8;
+        }
+
+        /* --- SCREEN --- */
+        .screen-bezel {
+            background: #222;
+            padding: 15px 20px;
+            border-radius: 15px 15px 5px 5px;
+            margin-bottom: 10px;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+        }
+        .lcd-display {
+            background: #c7d2bd; /* Classic LCD Greenish-Grey */
+            height: 80px;
             width: 100%;
-            height: 100%;
-            pointer-events: none; /* Let clicks pass through to canvas */
+            border-radius: 4px;
+            padding: 5px 10px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 20px;
-            box-sizing: border-box;
+            font-family: 'Roboto Mono', monospace;
+            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        #expression {
+            font-size: 0.9rem;
+            color: #333;
+            min-height: 1.2em;
+            letter-spacing: 1px;
+        }
+        #result {
+            font-size: 2rem;
+            text-align: right;
+            color: #000;
+            font-weight: 500;
         }
 
-        .score-box {
-            color: white;
-            font-size: 1.5rem;
-            font-weight: bold;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        /* --- CONTROL AREA (Replay/Shift) --- */
+        .control-area {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
         }
-
-        /* Modal for Start/Game Over */
-        #modal {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            padding: 40px 60px;
-            border-radius: 12px;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            pointer-events: auto;
-        }
-
-        h1 {
-            color: #fff;
-            margin: 0 0 10px 0;
-            font-size: 3rem;
-            text-transform: uppercase;
-            letter-spacing: 5px;
-            text-shadow: 0 0 20px #0ff;
-        }
-
-        p {
-            color: #ccc;
-            margin-bottom: 30px;
-        }
-
-        #big-score {
-            font-size: 4rem;
-            font-weight: bold;
-            color: #fff;
-            margin: 10px 0;
-            display: none;
-        }
-
-        button {
-            padding: 15px 40px;
-            font-size: 1.2rem;
-            background: linear-gradient(45deg, #0ff, #00f);
+        .small-round-btn {
+            width: 45px; height: 35px;
+            border-radius: 50%;
             border: none;
+            background: #9fa2a7;
+            box-shadow: 0 3px 0 #7a7c80, 0 4px 5px rgba(0,0,0,0.3);
             color: white;
-            border-radius: 30px;
-            cursor: pointer;
-            transition: transform 0.1s, box-shadow 0.3s;
+            font-size: 0.7rem;
             font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 20px #0ff;
-        }
-
-        canvas {
+            cursor: pointer;
+            margin: 0 auto;
             display: block;
         }
+        .btn-shift { background: #bcaaa4; color: #5d4037; } /* Faux shift color */
+        .btn-alpha { background: #ef9a9a; color: #b71c1c; }
+        .btn-on { background: #333; color: #fff; margin-left: auto; border-radius: 8px;}
+
+        /* The Big Replay Button */
+        .replay-pad {
+            width: 100px; height: 65px;
+            background: #e0e0e0;
+            border-radius: 50%;
+            border: 1px solid #bbb;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            margin: 0 auto;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .replay-pad::after {
+            content: "REPLAY";
+            position: absolute;
+            font-size: 0.6rem;
+            color: #888;
+            font-weight: bold;
+        }
+        /* Visual directional arrows */
+        .arrow { position: absolute; color: #aaa; font-size: 0.8rem; }
+        .a-up { top: 5px; } .a-down { bottom: 5px; } 
+        .a-left { left: 10px; } .a-right { right: 10px; }
+
+        /* --- MAIN KEYPAD --- */
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px 8px; /* Row gap, Col gap */
+            padding-top: 10px;
+        }
+
+        /* Standard Button */
+        .btn {
+            height: 40px;
+            border: none;
+            border-radius: 6px;
+            background: #3a3b3e; /* Dark Grey Scientific Keys */
+            color: #fff;
+            font-size: 0.9rem;
+            font-weight: 500;
+            box-shadow: 0 3px 0 #1e1f21, 0 4px 4px rgba(0,0,0,0.25);
+            cursor: pointer;
+            position: relative;
+            transition: transform 0.1s;
+        }
+        .btn:active {
+            transform: translateY(3px);
+            box-shadow: none;
+        }
+
+        /* Shift/Alpha Label Styles */
+        .btn::before {
+            content: attr(data-shift);
+            position: absolute;
+            top: -14px; left: 0; width: 100%;
+            font-size: 0.65rem;
+            color: #d4a017; /* Gold/Yellow for Shift */
+            text-align: center;
+            font-family: sans-serif;
+            pointer-events: none;
+        }
+        .btn::after {
+            content: attr(data-alpha);
+            position: absolute;
+            top: -14px; right: -5px;
+            font-size: 0.65rem;
+            color: #e53935; /* Red for Alpha */
+            text-align: center;
+            font-family: sans-serif;
+            pointer-events: none;
+        }
+
+        /* Number Keys (White/Light Grey) */
+        .btn-num {
+            background: #f1f2f4;
+            color: #000;
+            font-size: 1.2rem;
+            font-weight: 700;
+            box-shadow: 0 3px 0 #aeb0b5, 0 4px 4px rgba(0,0,0,0.2);
+            height: 50px;
+        }
+        
+        /* DEL/AC Keys */
+        .btn-red { background: #dba39a; color: #fff; } /* Light Orange/Red */
+        .btn-orange { background: #e67e22; color: #fff; box-shadow: 0 3px 0 #bd661a; }
+
+        /* Layout Tweaks */
+        .grid-full-row { grid-column: span 5; height: 10px; } /* Spacer */
+        
+        /* Font size adjustments for small sci keys */
+        .btn-sci { font-size: 0.8rem; }
     </style>
 </head>
 <body>
 
-    <div id="ui-layer">
-        <div class="score-box">Score: <span id="scoreEl">0</span></div>
-    </div>
+    <div class="calculator">
+        <div class="brand-header">
+            <div>
+                <div class="brand-logo">CASIO</div>
+                <div class="model-name">fx-991ES PLUS</div>
+                <div style="font-size: 0.6rem; color: #555; margin-top:2px;">NATURAL-V.P.A.M.</div>
+            </div>
+            <div class="solar-panel"></div>
+        </div>
 
-    <div id="modal">
-        <h1 id="modal-title">Neon Defiance</h1>
-        <p id="modal-desc">WASD to Move | Mouse to Aim | Click to Shoot</p>
-        <div id="big-score">0</div>
-        <button id="startBtn">Start Game</button>
-    </div>
+        <div class="screen-bezel">
+            <div class="lcd-display">
+                <div id="expression"></div>
+                <div id="result">0</div>
+            </div>
+        </div>
 
-    <canvas id="gameCanvas"></canvas>
+        <div class="control-area">
+            <button class="small-round-btn btn-shift">SHIFT</button>
+            <div class="replay-pad">
+                <span class="arrow a-up">▲</span>
+                <span class="arrow a-down">▼</span>
+                <span class="arrow a-left">◀</span>
+                <span class="arrow a-right">▶</span>
+            </div>
+            <button class="small-round-btn btn-alpha">ALPHA</button>
+        </div>
+
+        <div class="keypad">
+            <button class="btn btn-sci" data-shift="solve" onclick="insert('calc')">CALC</button>
+            <button class="btn btn-sci" data-shift="d/dx" onclick="insert('integral')">∫dx</button>
+            <button class="btn btn-sci" onclick="backspace()" style="background:#d8bfd8; color:#000;">DEL</button>
+            <button class="btn btn-sci btn-orange" onclick="allClear()">AC</button>
+            
+            <button class="btn btn-sci" data-shift="x!" onclick="insert('^-1')">x⁻¹</button>
+            <button class="btn btn-sci" data-shift="nPr" onclick="insert('log(')">log</button>
+            <button class="btn btn-sci" data-shift="nCr" onclick="insert('ln(')">ln</button>
+            <button class="btn btn-sci" data-shift="Rec" onclick="insert('^')">xⁿ</button>
+            <button class="btn btn-sci" data-shift="x³" onclick="insert('sqrt(')">√■</button>
+
+            <button class="btn btn-sci" data-shift="sin⁻¹" data-alpha="D" onclick="insert('sin(')">sin</button>
+            <button class="btn btn-sci" data-shift="cos⁻¹" data-alpha="E" onclick="insert('cos(')">cos</button>
+            <button class="btn btn-sci" data-shift="tan⁻¹" data-alpha="F" onclick="insert('tan(')">tan</button>
+            <button class="btn btn-sci" data-shift="π" onclick="insert('(')">(</button>
+            <button class="btn btn-sci" data-shift="e" onclick="insert(')')">)</button>
+
+            <button class="btn btn-num" onclick="insert(7)">7</button>
+            <button class="btn btn-num" onclick="insert(8)">8</button>
+            <button class="btn btn-num" onclick="insert(9)">9</button>
+            <button class="btn btn-num" style="background:#3a3b3e; color:#fff" onclick="insert('/')">÷</button>
+            <button class="btn btn-num" style="background:#3a3b3e; color:#fff" onclick="insert('*')">×</button>
+
+            <button class="btn btn-num" onclick="insert(4)">4</button>
+            <button class="btn btn-num" onclick="insert(5)">5</button>
+            <button class="btn btn-num" onclick="insert(6)">6</button>
+            <button class="btn btn-num" style="background:#3a3b3e; color:#fff" onclick="insert('-')">−</button>
+            <button class="btn btn-num" style="background:#3a3b3e; color:#fff" onclick="insert('+')">+</button>
+
+            <button class="btn btn-num" onclick="insert(1)">1</button>
+            <button class="btn btn-num" onclick="insert(2)">2</button>
+            <button class="btn btn-num" onclick="insert(3)">3</button>
+            <button class="btn btn-num" style="grid-column: span 2; width: 100%;" onclick="calculate()">=</button>
+
+            <button class="btn btn-num" onclick="insert(0)">0</button>
+            <button class="btn btn-num" onclick="insert('.')">.</button>
+            <button class="btn btn-num" onclick="insert('E')">×10ⁿ</button>
+            <button class="btn btn-num" style="background:#fff" onclick="insert('Ans')">Ans</button>
+        </div>
+    </div>
 
     <script>
-        const canvas = document.querySelector('canvas');
-        const c = canvas.getContext('2d');
+        const expressionEl = document.getElementById('expression');
+        const resultEl = document.getElementById('result');
+        let currentExp = "";
+        let ans = 0;
 
-        // UI Elements
-        const scoreEl = document.querySelector('#scoreEl');
-        const startBtn = document.querySelector('#startBtn');
-        const modal = document.querySelector('#modal');
-        const bigScoreEl = document.querySelector('#big-score');
-        const modalTitle = document.querySelector('#modal-title');
-        const modalDesc = document.querySelector('#modal-desc');
-
-        canvas.width = innerWidth;
-        canvas.height = innerHeight;
-
-        // Game State
-        let animationId;
-        let score = 0;
-        let gameActive = false;
-
-        // Helper: Resize handling
-        window.addEventListener('resize', () => {
-            canvas.width = innerWidth;
-            canvas.height = innerHeight;
-        });
-
-        // --- CLASSES ---
-
-        class Player {
-            constructor(x, y, radius, color) {
-                this.x = x;
-                this.y = y;
-                this.radius = radius;
-                this.color = color;
-                this.velocity = { x: 0, y: 0 };
-                this.friction = 0.95; // Smooth stopping
-                this.speed = 4;
+        function insert(val) {
+            // Logic for "Ans" key
+            if(val === 'Ans') {
+                currentExp += ans.toString();
+            } else {
+                currentExp += val;
             }
-
-            draw() {
-                c.beginPath();
-                c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-                c.fillStyle = this.color;
-                c.fill();
-                // Glow effect
-                c.shadowColor = this.color;
-                c.shadowBlur = 15;
-            }
-
-            update(keys) {
-                // Input handling
-                if (keys.w) this.velocity.y -= 0.5;
-                if (keys.s) this.velocity.y += 0.5;
-                if (keys.a) this.velocity.x -= 0.5;
-                if (keys.d) this.velocity.x += 0.5;
-
-                // Max speed cap
-                const speed = Math.hypot(this.velocity.x, this.velocity.y);
-                if (speed > this.speed) {
-                    const angle = Math.atan2(this.velocity.y, this.velocity.x);
-                    this.velocity.x = Math.cos(angle) * this.speed;
-                    this.velocity.y = Math.sin(angle) * this.speed;
-                }
-
-                // Apply friction
-                this.velocity.x *= this.friction;
-                this.velocity.y *= this.friction;
-
-                // Move
-                this.x += this.velocity.x;
-                this.y += this.velocity.y;
-
-                // Wall collision (Keep inside screen)
-                if (this.x - this.radius < 0) { this.x = this.radius; this.velocity.x *= -0.5; }
-                if (this.x + this.radius > canvas.width) { this.x = canvas.width - this.radius; this.velocity.x *= -0.5; }
-                if (this.y - this.radius < 0) { this.y = this.radius; this.velocity.y *= -0.5; }
-                if (this.y + this.radius > canvas.height) { this.y = canvas.height - this.radius; this.velocity.y *= -0.5; }
-
-                this.draw();
-            }
+            updateDisplay();
         }
 
-        class Projectile {
-            constructor(x, y, radius, color, velocity) {
-                this.x = x;
-                this.y = y;
-                this.radius = radius;
-                this.color = color;
-                this.velocity = velocity;
-            }
-
-            draw() {
-                c.beginPath();
-                c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-                c.fillStyle = this.color;
-                c.fill();
-                c.shadowBlur = 0; // Reset shadow for performance on many bullets
-            }
-
-            update() {
-                this.draw();
-                this.x = this.x + this.velocity.x;
-                this.y = this.y + this.velocity.y;
-            }
+        function allClear() {
+            currentExp = "";
+            resultEl.innerText = "0";
+            updateDisplay();
         }
 
-        class Enemy {
-            constructor(x, y, radius, color, velocity) {
-                this.x = x;
-                this.y = y;
-                this.radius = radius;
-                this.color = color;
-                this.velocity = velocity;
-                this.speedMultiplier = Math.random() * 0.5 + 0.5; // Random speed
-            }
-
-            draw() {
-                c.beginPath();
-                c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-                c.fillStyle = this.color;
-                c.fill();
-                c.shadowColor = this.color;
-                c.shadowBlur = 10;
-            }
-
-            update(player) {
-                this.draw();
-                // Calculate angle to player
-                const angle = Math.atan2(player.y - this.y, player.x - this.x);
-                
-                // Track player
-                this.velocity.x = Math.cos(angle) * this.speedMultiplier;
-                this.velocity.y = Math.sin(angle) * this.speedMultiplier;
-
-                this.x = this.x + this.velocity.x;
-                this.y = this.y + this.velocity.y;
-            }
+        function backspace() {
+            currentExp = currentExp.slice(0, -1);
+            updateDisplay();
         }
 
-        class Particle {
-            constructor(x, y, radius, color, velocity) {
-                this.x = x;
-                this.y = y;
-                this.radius = radius;
-                this.color = color;
-                this.velocity = velocity;
-                this.alpha = 1; // Transparency for fade out
-            }
-
-            draw() {
-                c.save();
-                c.globalAlpha = this.alpha;
-                c.beginPath();
-                c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-                c.fillStyle = this.color;
-                c.fill();
-                c.restore();
-            }
-
-            update() {
-                this.draw();
-                this.velocity.x *= 0.98; // Friction
-                this.velocity.y *= 0.98;
-                this.x += this.velocity.x;
-                this.y += this.velocity.y;
-                this.alpha -= 0.01; // Fade out speed
-            }
+        function updateDisplay() {
+            // Visual cleanup for the top screen (replace * with ×, etc)
+            let visual = currentExp
+                .replace(/\*/g, '×')
+                .replace(/\//g, '÷')
+                .replace(/sqrt/g, '√');
+            expressionEl.innerText = visual;
         }
 
-        // --- GAME LOGIC ---
+        function calculate() {
+            try {
+                if (currentExp === "") return;
 
-        let player = new Player(canvas.width / 2, canvas.height / 2, 15, 'white');
-        let projectiles = [];
-        let enemies = [];
-        let particles = [];
-        let spawnInterval;
-        
-        // Input State
-        const keys = { w: false, a: false, s: false, d: false };
+                // Prepare string for evaluation
+                // Replace math functions with JS equivalents
+                let evalExp = currentExp
+                    .replace(/\^/g, '**')
+                    .replace(/sin/g, 'Math.sin')
+                    .replace(/cos/g, 'Math.cos')
+                    .replace(/tan/g, 'Math.tan')
+                    .replace(/log/g, 'Math.log10')
+                    .replace(/ln/g, 'Math.log')
+                    .replace(/sqrt/g, 'Math.sqrt')
+                    .replace(/π/g, 'Math.PI')
+                    .replace(/e/g, 'Math.E')
+                    .replace(/E/g, '*10**'); // Scientific Notation key
 
-        function init() {
-            player = new Player(canvas.width / 2, canvas.height / 2, 15, 'white');
-            projectiles = [];
-            enemies = [];
-            particles = [];
-            score = 0;
-            scoreEl.innerHTML = score;
-            bigScoreEl.innerHTML = score;
-            gameActive = true;
-        }
+                let result = eval(evalExp);
 
-        function spawnEnemies() {
-            spawnInterval = setInterval(() => {
-                if(!gameActive) return;
-
-                const radius = Math.random() * (30 - 10) + 10;
-                let x, y;
-
-                // Spawn randomly on the edge of the screen
-                if (Math.random() < 0.5) {
-                    x = Math.random() < 0.5 ? 0 - radius : canvas.width + radius;
-                    y = Math.random() * canvas.height;
+                // Format result
+                if (!isFinite(result) || isNaN(result)) {
+                    resultEl.innerText = "Math ERROR";
                 } else {
-                    x = Math.random() * canvas.width;
-                    y = Math.random() < 0.5 ? 0 - radius : canvas.height + radius;
+                    // Handle float precision issues slightly
+                    result = parseFloat(result.toFixed(10)); 
+                    resultEl.innerText = result;
+                    ans = result; // Store answer
+                    currentExp = ""; // Clear expression line like real Casio on =
                 }
-
-                const color = `hsl(${Math.random() * 360}, 50%, 50%)`;
-                
-                // Velocity is calculated in update() loop for tracking, so init is 0
-                enemies.push(new Enemy(x, y, radius, color, { x: 0, y: 0 }));
-            }, 1000); // Spawn rate
-        }
-
-        function animate() {
-            animationId = requestAnimationFrame(animate);
-            
-            // Create trails effect by not clearing completely
-            c.fillStyle = 'rgba(0, 0, 0, 0.2)';
-            c.fillRect(0, 0, canvas.width, canvas.height);
-
-            player.update(keys);
-
-            // Update Particles
-            particles.forEach((particle, index) => {
-                if (particle.alpha <= 0) {
-                    particles.splice(index, 1);
-                } else {
-                    particle.update();
-                }
-            });
-
-            // Update Projectiles
-            projectiles.forEach((projectile, index) => {
-                projectile.update();
-
-                // Remove from edges
-                if (
-                    projectile.x + projectile.radius < 0 ||
-                    projectile.x - projectile.radius > canvas.width ||
-                    projectile.y + projectile.radius < 0 ||
-                    projectile.y - projectile.radius > canvas.height
-                ) {
-                    setTimeout(() => {
-                        projectiles.splice(index, 1);
-                    }, 0);
-                }
-            });
-
-            // Update Enemies
-            enemies.forEach((enemy, index) => {
-                enemy.update(player);
-
-                const dist = Math.hypot(player.x - enemy.x, player.y - enemy.y);
-
-                // End Game
-                if (dist - enemy.radius - player.radius < 1) {
-                    cancelAnimationFrame(animationId);
-                    clearInterval(spawnInterval);
-                    gameActive = false;
-                    
-                    modal.style.display = 'block';
-                    bigScoreEl.style.display = 'block';
-                    modalTitle.innerHTML = "Game Over";
-                    modalDesc.innerHTML = "The void has consumed you.";
-                    bigScoreEl.innerHTML = score;
-                    startBtn.innerHTML = "Restart";
-                }
-
-                // Projectile hits Enemy
-                projectiles.forEach((projectile, pIndex) => {
-                    const dist = Math.hypot(projectile.x - enemy.x, projectile.y - enemy.y);
-
-                    // Collision detected
-                    if (dist - enemy.radius - projectile.radius < 1) {
-                        
-                        // Create explosions
-                        for (let i = 0; i < enemy.radius * 2; i++) {
-                            particles.push(new Particle(
-                                projectile.x, 
-                                projectile.y, 
-                                Math.random() * 3, 
-                                enemy.color, 
-                                {
-                                    x: (Math.random() - 0.5) * (Math.random() * 8),
-                                    y: (Math.random() - 0.5) * (Math.random() * 8)
-                                }
-                            ));
-                        }
-
-                        // Shrink enemy or remove
-                        if (enemy.radius - 10 > 10) {
-                            // Increase score slightly for hit
-                            score += 50;
-                            scoreEl.innerHTML = score;
-                            
-                            // GSAP-like shrink effect (manual)
-                            enemy.radius -= 10;
-                            setTimeout(() => {
-                                projectiles.splice(pIndex, 1);
-                            }, 0);
-                        } else {
-                            // Kill enemy
-                            score += 150;
-                            scoreEl.innerHTML = score;
-                            
-                            setTimeout(() => {
-                                enemies.splice(index, 1);
-                                projectiles.splice(pIndex, 1);
-                            }, 0);
-                        }
-                    }
-                });
-            });
-        }
-
-        // --- EVENT LISTENERS ---
-
-        window.addEventListener('click', (event) => {
-            if (!gameActive) return;
-
-            const angle = Math.atan2(
-                event.clientY - player.y,
-                event.clientX - player.x
-            );
-            
-            const velocity = {
-                x: Math.cos(angle) * 8, // Bullet speed
-                y: Math.sin(angle) * 8
-            };
-
-            projectiles.push(new Projectile(player.x, player.y, 5, 'white', velocity));
-        });
-
-        // Movement Controls
-        window.addEventListener('keydown', (e) => {
-            switch(e.key.toLowerCase()) {
-                case 'w': keys.w = true; break;
-                case 'a': keys.a = true; break;
-                case 's': keys.s = true; break;
-                case 'd': keys.d = true; break;
+            } catch (err) {
+                resultEl.innerText = "Syntax ERROR";
             }
-        });
-
-        window.addEventListener('keyup', (e) => {
-            switch(e.key.toLowerCase()) {
-                case 'w': keys.w = false; break;
-                case 'a': keys.a = false; break;
-                case 's': keys.s = false; break;
-                case 'd': keys.d = false; break;
-            }
-        });
-
-        startBtn.addEventListener('click', () => {
-            init();
-            animate();
-            spawnEnemies();
-            modal.style.display = 'none';
-        });
-
+        }
     </script>
 </body>
 </html>
