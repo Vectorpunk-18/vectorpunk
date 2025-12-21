@@ -6,33 +6,35 @@
     <title>VectorPunk1 | Portal</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
-        /* --- ANIMATIONS --- */
         @keyframes float { 0%, 100% { transform: translate(0, 0px); } 50% { transform: translate(0, -20px); } }
         @keyframes pulse-slow { 0%, 100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.05); } }
         @keyframes fade-in-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         
+        /* NEW: Shine/Glow Animation for the Text */
         @keyframes shine {
             0% { background-position: -200% center; }
             100% { background-position: 200% center; }
         }
 
-        @keyframes glyph-pulse {
-            0% { box-shadow: 0 0 0 rgba(255, 255, 255, 0); border-color: rgba(255, 255, 255, 0.1); }
-            10% { box-shadow: 0 0 25px rgba(255, 255, 255, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.2); border-color: rgba(255, 255, 255, 0.8); }
-            100% { box-shadow: 0 0 0 rgba(255, 255, 255, 0); border-color: rgba(255, 255, 255, 0.1); }
-        }
-
-        .glyph-lit { animation: glyph-pulse 0.6s ease-out forwards; }
+        .animate-float { animation: float 8s ease-in-out infinite; }
+        .animate-pulse-slow { animation: pulse-slow 6s ease-in-out infinite; }
         .animate-enter { animation: fade-in-up 1s ease-out forwards; opacity: 0; }
         .delay-100 { animation-delay: 100ms; }
         .delay-200 { animation-delay: 200ms; }
         .delay-300 { animation-delay: 300ms; }
-        .delay-400 { animation-delay: 400ms; }
         
+        /* NEW: Class for the glowing text effect */
         .text-glow-anim {
-            background: linear-gradient(to right, #6b7280 20%, #ffffff 50%, #6b7280 80%);
+            background: linear-gradient(
+                to right,
+                #6b7280 20%, /* Darker Grey (Start) */
+                #ffffff 50%, /* Bright White (The Glow) */
+                #6b7280 80%  /* Darker Grey (End) */
+            );
             background-size: 200% auto;
             color: transparent;
             -webkit-background-clip: text;
@@ -40,70 +42,28 @@
             animation: shine 3s linear infinite;
         }
 
-        body { background-color: #000; color: white; position: relative; }
-        
+        body { background-color: #000; color: white; }
         .glass-card {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
         }
-
-        .glass-card:hover {
-            border-color: rgba(255, 255, 255, 0.2);
-            box-shadow: 0 0 20px rgba(255,255,255,0.05);
-        }
-
-        /* Buttons */
-        .card-btn {
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.7);
-            transition: all 0.2s;
-        }
-        .card-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border-color: rgba(255, 255, 255, 0.3);
-            cursor: pointer;
-        }
-        .card-btn:active { transform: scale(0.9); background: white; color: black; }
-
-        .loader {
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-left-color: #fff;
-            border-radius: 50%;
-            width: 12px;
-            height: 12px;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body id="mainBody" class="min-h-screen overflow-x-hidden selection:bg-indigo-500/30">
+<body class="min-h-screen overflow-x-hidden selection:bg-indigo-500/30">
 
-    <div class="fixed inset-0 z-0 pointer-events-none">
+    <div class="fixed inset-0 z-0">
         <div class="absolute top-[-10%] left-[-10%] w-[300px] h-[300px] bg-indigo-600/30 rounded-full blur-[100px] animate-pulse-slow"></div>
         <div class="absolute bottom-[-10%] right-[-10%] w-[300px] h-[300px] bg-purple-600/30 rounded-full blur-[100px] animate-pulse-slow"></div>
+        <div class="absolute top-[40%] left-[50%] translate-x-[-50%] w-[200px] h-[200px] bg-pink-600/20 rounded-full blur-[80px] animate-float"></div>
         <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"></div>
     </div>
 
     <main class="relative z-10 min-h-screen flex flex-col items-center justify-center p-6">
         
-        <div id="header-container" class="relative flex flex-col items-center text-center mb-6 animate-enter glass-card p-8 rounded-3xl border-transparent transition-all w-full max-w-md">
-            
-            <div class="absolute top-4 left-4 flex flex-col gap-2 z-20">
-                <button onclick="triggerGlyph()" class="card-btn w-8 h-8 rounded-full flex items-center justify-center font-serif italic text-sm">
-                    &pi;
-                </button>
-                <button onclick="copyLink()" id="shareBtn" class="card-btn w-8 h-8 rounded-full flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg>
-                </button>
-            </div>
-
-            <div class="relative mb-6 group mt-2">
+        <div class="flex flex-col items-center text-center mb-10 animate-enter">
+            <div class="relative mb-6 group">
                 <div class="absolute inset-0 rounded-full bg-indigo-500 opacity-40 blur-xl"></div>
                 <img src="https://i.ibb.co/gLGm4NL4/IMG-20251030-154927-685.webp" alt="VectorPunk1 Avatar" class="relative w-32 h-32 rounded-full border-4 border-black shadow-2xl object-cover bg-zinc-900">
             </div>
@@ -112,73 +72,73 @@
                 VECTORPUNK
             </h1>
             
-            <p class="text-zinc-500 text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase mb-6">
+            <p class="text-zinc-500 text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase">
                 GAMER &bull; STREAMER &bull; CREATOR
             </p>
-
-            <div id="viz-container" class="relative w-full max-w-[200px] h-[30px] glass-card rounded-xl overflow-hidden flex items-center justify-center border-zinc-800 transition-all">
-                <canvas id="visualizer" width="200" height="30"></canvas>
-            </div>
+            
+            <button onclick="copyLink()" id="shareBtn" class="mt-8 flex items-center gap-2 text-sm font-medium text-zinc-500 hover:text-white py-2 px-4 rounded-full glass-card transition-all">
+                <i data-lucide="share-2" class="w-4 h-4"></i>
+                <span id="shareText">Share Profile</span>
+            </button>
         </div>
 
-        <div id="links-container" class="w-full max-w-md flex flex-col gap-4 animate-enter delay-100 mt-2 glass-card p-6 rounded-3xl border-transparent transition-all">
-            
+        <div class="w-full max-w-md flex flex-col gap-4 animate-enter delay-100">
             <a href="https://twitch.tv/vectorpunk?sr=a" target="_blank" class="glass-card p-4 rounded-2xl flex items-center gap-4 hover:bg-white/10 transition-all group">
                 <div class="w-12 h-12 rounded-xl bg-black/40 flex items-center justify-center border border-white/10">
-                    <svg class="text-purple-400 w-6 h-6 group-hover:scale-110 transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2H3v16h5v4l4-4h5l4-4V2zm-10 9V7m5 4V7"/></svg>
+                    <i data-lucide="twitch" class="text-purple-400 w-6 h-6 group-hover:scale-110 transition-transform"></i>
                 </div>
                 <div class="flex-1 min-w-0">
                     <h3 class="font-semibold text-lg truncate">Twitch</h3>
                     <p class="text-zinc-400 text-xs truncate">Watch Live Streams</p>
                 </div>
-                <svg class="text-zinc-600 w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></svg>
+                <i data-lucide="external-link" class="text-zinc-600 w-4 h-4"></i>
             </a>
 
             <a href="https://discord.gg/2gQdKUhv8" target="_blank" class="glass-card p-4 rounded-2xl flex items-center gap-4 hover:bg-white/10 transition-all group">
                 <div class="w-12 h-12 rounded-xl bg-black/40 flex items-center justify-center border border-white/10">
-                    <svg class="text-indigo-400 w-6 h-6 group-hover:scale-110 transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" x2="10" y1="12" y2="12"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="15" x2="15.01" y1="13" y2="13"/><line x1="18" x2="18.01" y1="11" y2="11"/><rect width="20" height="12" x="2" y="6" rx="2"/></svg>
+                    <i data-lucide="message-circle" class="text-indigo-400 w-6 h-6 group-hover:scale-110 transition-transform"></i>
                 </div>
                 <div class="flex-1 min-w-0">
                     <h3 class="font-semibold text-lg truncate">Discord</h3>
                     <p class="text-zinc-400 text-xs truncate">Join the Community</p>
                 </div>
-                <svg class="text-zinc-600 w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></svg>
+                <i data-lucide="external-link" class="text-zinc-600 w-4 h-4"></i>
             </a>
 
             <a href="https://youtube.com/@vectorpunk1?si=X6kyhLuZRLyP96ne" target="_blank" class="glass-card p-4 rounded-2xl flex items-center gap-4 hover:bg-white/10 transition-all group">
                 <div class="w-12 h-12 rounded-xl bg-black/40 flex items-center justify-center border border-white/10">
-                    <svg class="text-red-500 w-6 h-6 group-hover:scale-110 transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"/><path d="m10 15 5-3-5-3z"/></svg>
+                    <i data-lucide="youtube" class="text-red-500 w-6 h-6 group-hover:scale-110 transition-transform"></i>
                 </div>
                 <div class="flex-1 min-w-0">
                     <h3 class="font-semibold text-lg truncate">YouTube</h3>
                     <p class="text-zinc-400 text-xs truncate">VODs & Highlights</p>
                 </div>
-                <svg class="text-zinc-600 w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></svg>
+                <i data-lucide="external-link" class="text-zinc-600 w-4 h-4"></i>
             </a>
 
             <a href="https://www.instagram.com/vectorpunk1?igsh=MXF1am1jM3N1eHA0Nw==" target="_blank" class="glass-card p-4 rounded-2xl flex items-center gap-4 hover:bg-white/10 transition-all group">
                 <div class="w-12 h-12 rounded-xl bg-black/40 flex items-center justify-center border border-white/10">
-                    <svg class="text-pink-500 w-6 h-6 group-hover:scale-110 transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+                    <i data-lucide="instagram" class="text-pink-500 w-6 h-6 group-hover:scale-110 transition-transform"></i>
                 </div>
                 <div class="flex-1 min-w-0">
                     <h3 class="font-semibold text-lg truncate">Instagram</h3>
                     <p class="text-zinc-400 text-xs truncate">Behind the Scenes</p>
                 </div>
-                <svg class="text-zinc-600 w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></svg>
+                <i data-lucide="external-link" class="text-zinc-600 w-4 h-4"></i>
             </a>
             
             <div class="mt-2">
                 <button onclick="toggleDonate()" class="w-full glass-card p-4 rounded-2xl flex items-center justify-between hover:bg-white/10 transition-all group">
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center border border-green-500/30">
-                            <svg class="text-green-400 w-6 h-6 group-hover:scale-110 transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                            <i data-lucide="heart" class="text-green-400 w-6 h-6 group-hover:scale-110 transition-transform"></i>
                         </div>
                         <div class="text-left">
                             <h3 class="font-semibold text-lg">Support the Stream</h3>
                             <p class="text-zinc-400 text-xs">Donate via UPI</p>
                         </div>
                     </div>
-                    <svg id="donateIcon" class="text-zinc-500 w-5 h-5 transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                    <i data-lucide="chevron-down" id="donateIcon" class="text-zinc-500 w-5 h-5 transition-transform"></i>
                 </button>
                 
                 <div id="donateSection" class="hidden glass-card mt-2 p-6 rounded-2xl text-center border-t-0">
@@ -189,24 +149,30 @@
                     <p class="text-xs text-zinc-500 mt-4">Thank you for the support!</p>
                 </div>
             </div>
+
         </div>
 
-        <div class="w-full max-w-md mt-4 animate-enter delay-200">
-             <div class="glass-card rounded-3xl p-6 text-center relative overflow-hidden">
+        <div class="w-full max-w-md mt-8 animate-enter delay-200">
+            <div class="glass-card rounded-3xl p-6 text-center relative overflow-hidden">
                 <div class="relative z-10">
                     <div class="w-10 h-10 bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-3 border border-white/10">
-                        <svg class="w-5 h-5 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                        <i data-lucide="bell" class="w-5 h-5 text-white"></i>
                     </div>
                     <h3 class="font-bold text-lg mb-1">Get Notified</h3>
                     <p class="text-zinc-400 text-xs mb-4">Email alerts when I go live.</p>
 
-                    <form id="my-form" action="https://formspree.io/f/xvgewpln" method="POST" class="flex flex-col gap-3">
+                    <form 
+                        id="my-form"
+                        action="https://formspree.io/f/xvgewpln" 
+                        method="POST"
+                        class="flex flex-col gap-3"
+                    >
                         <input type="email" name="email" id="emailInput" required placeholder="Enter email..." class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 transition-colors text-white">
                         <button type="submit" id="submitBtn" class="w-full bg-white text-black font-bold text-sm py-3 rounded-xl hover:bg-zinc-200 transition-colors">Notify Me</button>
                     </form>
 
                     <div id="successMsg" class="hidden flex-col items-center gap-2 text-green-400 bg-green-500/10 p-3 rounded-xl border border-green-500/20">
-                        <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        <i data-lucide="check-circle-2" class="w-6 h-6"></i>
                         <span class="font-semibold text-sm">You're on the list!</span>
                     </div>
                      <div id="errorMsg" class="hidden text-red-400 text-xs mt-2">Oops! Something went wrong.</div>
@@ -214,97 +180,79 @@
             </div>
         </div>
 
-        <div class="w-full max-w-md mt-4 animate-enter delay-300">
-            <div class="glass-card rounded-2xl p-4 flex items-center justify-between border-indigo-500/20">
-                <div class="flex items-center gap-3">
-                    <div class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
-                    <div class="flex flex-col">
-                        <span class="text-[10px] uppercase tracking-widest text-zinc-500 font-bold">Neural Link Status</span>
-                        <span class="text-xs text-indigo-300">Monitoring Traffic</span>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2 bg-black/30 px-3 py-1.5 rounded-lg border border-white/5">
-                    <svg class="w-3 h-3 text-zinc-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-                    <span id="visit-counter" class="font-mono text-sm font-bold text-white tracking-widest">
-                        <span class="loader"></span>
-                    </span>
-                </div>
-            </div>
-        </div>
-
-        <footer class="mt-10 text-zinc-700 text-xs font-medium animate-enter delay-400">
+        <footer class="mt-10 text-zinc-700 text-xs font-medium animate-enter delay-300">
             © 2024 vectorpunk1
         </footer>
 
     </main>
 
     <script>
-        // --- COUNTER LOGIC ---
-        document.addEventListener('DOMContentLoaded', async () => {
-            const counterElement = document.getElementById('visit-counter');
-            const apiUrl = 'https://api.counterapi.dev/v1/vectorpunk1-site-main/views/up';
+        // Initialize Icons
+        lucide.createIcons();
 
-            try {
-                const response = await fetch(apiUrl);
-                if (!response.ok) throw new Error("Network response was not ok");
-                const data = await response.json();
-                
-                counterElement.style.opacity = 0;
-                setTimeout(() => {
-                    counterElement.innerHTML = data.count.toLocaleString();
-                    counterElement.style.opacity = 1;
-                    counterElement.classList.add('text-glow-anim'); 
-                }, 200);
-
-            } catch (error) {
-                console.log("Counter Error:", error);
-                counterElement.innerHTML = "ONLINE"; 
-                counterElement.style.color = "#4ade80"; 
-            }
-            
-            // Draw idle visualizer line immediately
-            drawIdleLine();
-        });
-
-        // --- AUDIO VISUALIZER ---
-        let audioCtx;
-        let analyser;
-        let dataArray;
-        let canvas, ctx;
-        let isActive = false;
-
-        function drawIdleLine() {
-            const cvs = document.getElementById('visualizer');
-            const cx = cvs.getContext('2d');
-            cx.clearRect(0,0,cvs.width, cvs.height);
-            cx.beginPath();
-            cx.moveTo(0, cvs.height/2);
-            cx.lineTo(cvs.width, cvs.height/2);
-            cx.strokeStyle = "rgba(255,255,255,0.2)";
-            cx.stroke();
+        // Copy Link Function
+        function copyLink() {
+            navigator.clipboard.writeText(window.location.href);
+            const btn = document.getElementById('shareText');
+            const originalText = btn.innerText;
+            btn.innerText = "Copied!";
+            setTimeout(() => {
+                btn.innerText = originalText;
+            }, 2000);
         }
 
-        function initAudio() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                analyser = audioCtx.createAnalyser();
-                analyser.fftSize = 2048; 
-                dataArray = new Uint8Array(analyser.frequencyBinCount);
-                canvas = document.getElementById('visualizer');
-                ctx = canvas.getContext('2d');
+        // Toggle Donation Section
+        function toggleDonate() {
+            const section = document.getElementById('donateSection');
+            const icon = document.getElementById('donateIcon');
+            section.classList.toggle('hidden');
+            
+            if (section.classList.contains('hidden')) {
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                icon.style.transform = 'rotate(180deg)';
             }
         }
 
-        function playGlitchSound() {
-            if (!audioCtx) initAudio();
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-
-            const osc = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
+        // Handle Formspree Submission without redirect
+        var form = document.getElementById("my-form");
+        
+        async function handleSubmit(event) {
+            event.preventDefault();
+            var status = document.getElementById("successMsg");
+            var error = document.getElementById("errorMsg");
+            var btn = document.getElementById("submitBtn");
             
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(150, audioCtx.currentTime); 
-            osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.1); 
-            osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.3); 
+            var data = new FormData(event.target);
+            
+            btn.innerHTML = "Sending...";
+            btn.disabled = true;
 
-            gainNode.gain.setValueAtTime(0.3, audioCtx.curre
+            fetch(event.target.action, {
+                method: form.method,
+                body: data,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            }).then(response => {
+                if (response.ok) {
+                    form.classList.add('hidden');
+                    status.classList.remove('hidden');
+                    status.classList.add('flex');
+                } else {
+                    response.json().then(data => {
+                        error.classList.remove('hidden');
+                        btn.innerHTML = "Notify Me";
+                        btn.disabled = false;
+                    })
+                }
+            }).catch(error => {
+                error.classList.remove('hidden');
+                btn.innerHTML = "Notify Me";
+                btn.disabled = false;
+            });
+        }
+        form.addEventListener("submit", handleSubmit);
+    </script>
+</body>
+</html>
