@@ -6,9 +6,9 @@
     <title>VectorPunk1 | Portal</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
+        /* --- ANIMATIONS --- */
         @keyframes float { 0%, 100% { transform: translate(0, 0px); } 50% { transform: translate(0, -20px); } }
         @keyframes pulse-slow { 0%, 100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.05); } }
         @keyframes fade-in-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -18,21 +18,18 @@
             100% { background-position: 200% center; }
         }
 
-        /* Glyph Pulse Animation */
         @keyframes glyph-pulse {
             0% { box-shadow: 0 0 0 rgba(255, 255, 255, 0); border-color: rgba(255, 255, 255, 0.1); }
             10% { box-shadow: 0 0 25px rgba(255, 255, 255, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.2); border-color: rgba(255, 255, 255, 0.8); }
             100% { box-shadow: 0 0 0 rgba(255, 255, 255, 0); border-color: rgba(255, 255, 255, 0.1); }
         }
 
-        .glyph-lit {
-            animation: glyph-pulse 0.6s ease-out forwards;
-        }
-
+        .glyph-lit { animation: glyph-pulse 0.6s ease-out forwards; }
         .animate-enter { animation: fade-in-up 1s ease-out forwards; opacity: 0; }
         .delay-100 { animation-delay: 100ms; }
         .delay-200 { animation-delay: 200ms; }
         .delay-300 { animation-delay: 300ms; }
+        .delay-400 { animation-delay: 400ms; }
         
         .text-glow-anim {
             background: linear-gradient(to right, #6b7280 20%, #ffffff 50%, #6b7280 80%);
@@ -53,7 +50,12 @@
             transition: all 0.3s ease;
         }
 
-        /* Minimal button style */
+        .glass-card:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 20px rgba(255,255,255,0.05);
+        }
+
+        /* Buttons */
         .card-btn {
             background: rgba(0, 0, 0, 0.4);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -66,11 +68,18 @@
             border-color: rgba(255, 255, 255, 0.3);
             cursor: pointer;
         }
-        .card-btn:active {
-            transform: scale(0.9);
-            background: white;
-            color: black;
+        .card-btn:active { transform: scale(0.9); background: white; color: black; }
+
+        .loader {
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-left-color: #fff;
+            border-radius: 50%;
+            width: 12px;
+            height: 12px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
         }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body id="mainBody" class="min-h-screen overflow-x-hidden selection:bg-indigo-500/30">
@@ -86,16 +95,11 @@
         <div id="header-container" class="relative flex flex-col items-center text-center mb-6 animate-enter glass-card p-8 rounded-3xl border-transparent transition-all w-full max-w-md">
             
             <div class="absolute top-4 left-4 flex flex-col gap-2 z-20">
-                <button onclick="triggerGlyph()" class="card-btn w-8 h-8 rounded-full flex items-center justify-center font-serif italic text-sm" title="Sound Check">
+                <button onclick="triggerGlyph()" class="card-btn w-8 h-8 rounded-full flex items-center justify-center font-serif italic text-sm">
                     &pi;
                 </button>
-                
-                <a href="robot-runner.html" target="_blank" class="card-btn w-8 h-8 rounded-full flex items-center justify-center group" title="Play Robot Run">
-                    <i data-lucide="bot" class="w-4 h-4 group-hover:text-cyan-400 transition-colors"></i>
-                </a>
-
-                <button onclick="copyLink()" id="shareBtn" class="card-btn w-8 h-8 rounded-full flex items-center justify-center" title="Share">
-                    <i data-lucide="share-2" class="w-3 h-3"></i>
+                <button onclick="copyLink()" id="shareBtn" class="card-btn w-8 h-8 rounded-full flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg>
                 </button>
             </div>
 
@@ -118,62 +122,63 @@
         </div>
 
         <div id="links-container" class="w-full max-w-md flex flex-col gap-4 animate-enter delay-100 mt-2 glass-card p-6 rounded-3xl border-transparent transition-all">
+            
             <a href="https://twitch.tv/vectorpunk?sr=a" target="_blank" class="glass-card p-4 rounded-2xl flex items-center gap-4 hover:bg-white/10 transition-all group">
                 <div class="w-12 h-12 rounded-xl bg-black/40 flex items-center justify-center border border-white/10">
-                    <i data-lucide="twitch" class="text-purple-400 w-6 h-6 group-hover:scale-110 transition-transform"></i>
+                    <svg class="text-purple-400 w-6 h-6 group-hover:scale-110 transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2H3v16h5v4l4-4h5l4-4V2zm-10 9V7m5 4V7"/></svg>
                 </div>
                 <div class="flex-1 min-w-0">
                     <h3 class="font-semibold text-lg truncate">Twitch</h3>
                     <p class="text-zinc-400 text-xs truncate">Watch Live Streams</p>
                 </div>
-                <i data-lucide="external-link" class="text-zinc-600 w-4 h-4"></i>
+                <svg class="text-zinc-600 w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></svg>
             </a>
 
             <a href="https://discord.gg/2gQdKUhv8" target="_blank" class="glass-card p-4 rounded-2xl flex items-center gap-4 hover:bg-white/10 transition-all group">
                 <div class="w-12 h-12 rounded-xl bg-black/40 flex items-center justify-center border border-white/10">
-                    <i data-lucide="message-circle" class="text-indigo-400 w-6 h-6 group-hover:scale-110 transition-transform"></i>
+                    <svg class="text-indigo-400 w-6 h-6 group-hover:scale-110 transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" x2="10" y1="12" y2="12"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="15" x2="15.01" y1="13" y2="13"/><line x1="18" x2="18.01" y1="11" y2="11"/><rect width="20" height="12" x="2" y="6" rx="2"/></svg>
                 </div>
                 <div class="flex-1 min-w-0">
                     <h3 class="font-semibold text-lg truncate">Discord</h3>
                     <p class="text-zinc-400 text-xs truncate">Join the Community</p>
                 </div>
-                <i data-lucide="external-link" class="text-zinc-600 w-4 h-4"></i>
+                <svg class="text-zinc-600 w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></svg>
             </a>
 
             <a href="https://youtube.com/@vectorpunk1?si=X6kyhLuZRLyP96ne" target="_blank" class="glass-card p-4 rounded-2xl flex items-center gap-4 hover:bg-white/10 transition-all group">
                 <div class="w-12 h-12 rounded-xl bg-black/40 flex items-center justify-center border border-white/10">
-                    <i data-lucide="youtube" class="text-red-500 w-6 h-6 group-hover:scale-110 transition-transform"></i>
+                    <svg class="text-red-500 w-6 h-6 group-hover:scale-110 transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"/><path d="m10 15 5-3-5-3z"/></svg>
                 </div>
                 <div class="flex-1 min-w-0">
                     <h3 class="font-semibold text-lg truncate">YouTube</h3>
                     <p class="text-zinc-400 text-xs truncate">VODs & Highlights</p>
                 </div>
-                <i data-lucide="external-link" class="text-zinc-600 w-4 h-4"></i>
+                <svg class="text-zinc-600 w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></svg>
             </a>
 
             <a href="https://www.instagram.com/vectorpunk1?igsh=MXF1am1jM3N1eHA0Nw==" target="_blank" class="glass-card p-4 rounded-2xl flex items-center gap-4 hover:bg-white/10 transition-all group">
                 <div class="w-12 h-12 rounded-xl bg-black/40 flex items-center justify-center border border-white/10">
-                    <i data-lucide="instagram" class="text-pink-500 w-6 h-6 group-hover:scale-110 transition-transform"></i>
+                    <svg class="text-pink-500 w-6 h-6 group-hover:scale-110 transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
                 </div>
                 <div class="flex-1 min-w-0">
                     <h3 class="font-semibold text-lg truncate">Instagram</h3>
                     <p class="text-zinc-400 text-xs truncate">Behind the Scenes</p>
                 </div>
-                <i data-lucide="external-link" class="text-zinc-600 w-4 h-4"></i>
+                <svg class="text-zinc-600 w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></svg>
             </a>
             
             <div class="mt-2">
                 <button onclick="toggleDonate()" class="w-full glass-card p-4 rounded-2xl flex items-center justify-between hover:bg-white/10 transition-all group">
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center border border-green-500/30">
-                            <i data-lucide="heart" class="text-green-400 w-6 h-6 group-hover:scale-110 transition-transform"></i>
+                            <svg class="text-green-400 w-6 h-6 group-hover:scale-110 transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
                         </div>
                         <div class="text-left">
                             <h3 class="font-semibold text-lg">Support the Stream</h3>
                             <p class="text-zinc-400 text-xs">Donate via UPI</p>
                         </div>
                     </div>
-                    <i data-lucide="chevron-down" id="donateIcon" class="text-zinc-500 w-5 h-5 transition-transform"></i>
+                    <svg id="donateIcon" class="text-zinc-500 w-5 h-5 transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
                 </button>
                 
                 <div id="donateSection" class="hidden glass-card mt-2 p-6 rounded-2xl text-center border-t-0">
@@ -184,14 +189,13 @@
                     <p class="text-xs text-zinc-500 mt-4">Thank you for the support!</p>
                 </div>
             </div>
-
         </div>
 
-        <div class="w-full max-w-md mt-8 animate-enter delay-200">
+        <div class="w-full max-w-md mt-4 animate-enter delay-200">
              <div class="glass-card rounded-3xl p-6 text-center relative overflow-hidden">
                 <div class="relative z-10">
                     <div class="w-10 h-10 bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-3 border border-white/10">
-                        <i data-lucide="bell" class="w-5 h-5 text-white"></i>
+                        <svg class="w-5 h-5 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
                     </div>
                     <h3 class="font-bold text-lg mb-1">Get Notified</h3>
                     <p class="text-zinc-400 text-xs mb-4">Email alerts when I go live.</p>
@@ -202,7 +206,7 @@
                     </form>
 
                     <div id="successMsg" class="hidden flex-col items-center gap-2 text-green-400 bg-green-500/10 p-3 rounded-xl border border-green-500/20">
-                        <i data-lucide="check-circle-2" class="w-6 h-6"></i>
+                        <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                         <span class="font-semibold text-sm">You're on the list!</span>
                     </div>
                      <div id="errorMsg" class="hidden text-red-400 text-xs mt-2">Oops! Something went wrong.</div>
@@ -210,31 +214,82 @@
             </div>
         </div>
 
-        <footer class="mt-10 text-zinc-700 text-xs font-medium animate-enter delay-300">
+        <div class="w-full max-w-md mt-4 animate-enter delay-300">
+            <div class="glass-card rounded-2xl p-4 flex items-center justify-between border-indigo-500/20">
+                <div class="flex items-center gap-3">
+                    <div class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+                    <div class="flex flex-col">
+                        <span class="text-[10px] uppercase tracking-widest text-zinc-500 font-bold">Neural Link Status</span>
+                        <span class="text-xs text-indigo-300">Monitoring Traffic</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 bg-black/30 px-3 py-1.5 rounded-lg border border-white/5">
+                    <svg class="w-3 h-3 text-zinc-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <span id="visit-counter" class="font-mono text-sm font-bold text-white tracking-widest">
+                        <span class="loader"></span>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <footer class="mt-10 text-zinc-700 text-xs font-medium animate-enter delay-400">
             © 2024 vectorpunk1
         </footer>
 
     </main>
 
     <script>
-        lucide.createIcons();
+        // --- COUNTER LOGIC ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            const counterElement = document.getElementById('visit-counter');
+            const apiUrl = 'https://api.counterapi.dev/v1/vectorpunk1-site-main/views/up';
 
-        // --- AUDIO & HEARTBEAT VISUALIZER LOGIC ---
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error("Network response was not ok");
+                const data = await response.json();
+                
+                counterElement.style.opacity = 0;
+                setTimeout(() => {
+                    counterElement.innerHTML = data.count.toLocaleString();
+                    counterElement.style.opacity = 1;
+                    counterElement.classList.add('text-glow-anim'); 
+                }, 200);
+
+            } catch (error) {
+                console.log("Counter Error:", error);
+                counterElement.innerHTML = "ONLINE"; 
+                counterElement.style.color = "#4ade80"; 
+            }
+            
+            // Draw idle visualizer line immediately
+            drawIdleLine();
+        });
+
+        // --- AUDIO VISUALIZER ---
         let audioCtx;
         let analyser;
         let dataArray;
         let canvas, ctx;
-        let animationId;
         let isActive = false;
+
+        function drawIdleLine() {
+            const cvs = document.getElementById('visualizer');
+            const cx = cvs.getContext('2d');
+            cx.clearRect(0,0,cvs.width, cvs.height);
+            cx.beginPath();
+            cx.moveTo(0, cvs.height/2);
+            cx.lineTo(cvs.width, cvs.height/2);
+            cx.strokeStyle = "rgba(255,255,255,0.2)";
+            cx.stroke();
+        }
 
         function initAudio() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 analyser = audioCtx.createAnalyser();
                 analyser.fftSize = 2048; 
-                const bufferLength = analyser.frequencyBinCount;
-                dataArray = new Uint8Array(bufferLength);
-                
+                dataArray = new Uint8Array(analyser.frequencyBinCount);
                 canvas = document.getElementById('visualizer');
                 ctx = canvas.getContext('2d');
             }
@@ -247,175 +302,9 @@
             const osc = audioCtx.createOscillator();
             const gainNode = audioCtx.createGain();
             
-            // Tech sound preset
             osc.type = 'sawtooth';
             osc.frequency.setValueAtTime(150, audioCtx.currentTime); 
             osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.1); 
             osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.3); 
 
-            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
-
-            osc.connect(gainNode);
-            gainNode.connect(analyser); 
-            analyser.connect(audioCtx.destination); 
-
-            osc.start();
-            
-            // Start visualization logic
-            isActive = true;
-            drawWaveform();
-            
-            // Stop logic
-            setTimeout(() => {
-                isActive = false;
-                // Clear canvas after sound ends
-                setTimeout(() => {
-                    if(!isActive && ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
-                }, 100);
-            }, 400);
-            
-            osc.stop(audioCtx.currentTime + 0.4);
-        }
-
-        // Draw Waveform
-        function drawWaveform() {
-            if (!isActive) return;
-
-            animationId = requestAnimationFrame(drawWaveform);
-            analyser.getByteTimeDomainData(dataArray);
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.lineWidth = 2; 
-            ctx.strokeStyle = '#ffffff'; 
-            ctx.shadowBlur = 8;
-            ctx.shadowColor = "white";
-
-            ctx.beginPath();
-            const sliceWidth = canvas.width * 1.0 / dataArray.length;
-            let x = 0;
-
-            for(let i = 0; i < dataArray.length; i++) {
-                const v = dataArray[i] / 128.0; 
-                const y = v * canvas.height / 2; 
-
-                if(i === 0) {
-                    ctx.moveTo(x, y);
-                } else {
-                    ctx.lineTo(x, y);
-                }
-                x += sliceWidth;
-            }
-            ctx.lineTo(canvas.width, canvas.height / 2);
-            ctx.stroke();
-        }
-
-        function triggerGlyph() {
-            initAudio(); 
-            playGlitchSound(); 
-
-            if (navigator.vibrate) navigator.vibrate([50, 30, 50, 30, 100]); 
-
-            // Trigger light pulse on the cards
-            const header = document.getElementById('header-container');
-            const links = document.getElementById('links-container');
-            const vizContainer = document.getElementById('viz-container');
-
-            header.classList.remove('glyph-lit');
-            links.classList.remove('glyph-lit');
-            vizContainer.classList.remove('glyph-lit');
-            
-            void header.offsetWidth; 
-
-            header.classList.add('glyph-lit');
-            links.classList.add('glyph-lit');
-            vizContainer.classList.add('glyph-lit');
-        }
-
-        function copyLink() {
-            const url = window.location.href;
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(url)
-                    .then(() => showSuccess())
-                    .catch(() => fallbackCopy(url));
-            } else {
-                fallbackCopy(url);
-            }
-        }
-
-        function fallbackCopy(text) {
-            try {
-                const textArea = document.createElement("textarea");
-                textArea.value = text;
-                textArea.style.position = "fixed";
-                textArea.style.left = "-9999px";
-                document.body.appendChild(textArea);
-                textArea.focus();
-                textArea.select();
-                
-                const successful = document.execCommand('copy');
-                document.body.removeChild(textArea);
-                if (successful) showSuccess();
-            } catch (err) {
-                alert("Copy failed. Please copy the URL manually.");
-            }
-        }
-
-        function showSuccess() {
-            if (navigator.vibrate) navigator.vibrate(50);
-            const btn = document.querySelector('#shareBtn');
-            const originalHTML = btn.innerHTML;
-            btn.innerHTML = `<i data-lucide="check" class="w-3 h-3 text-green-400"></i>`;
-            lucide.createIcons();
-            setTimeout(() => {
-                btn.innerHTML = originalHTML;
-                lucide.createIcons();
-            }, 2000);
-        }
-
-        function toggleDonate() {
-            const section = document.getElementById('donateSection');
-            const icon = document.getElementById('donateIcon');
-            section.classList.toggle('hidden');
-            if (section.classList.contains('hidden')) {
-                icon.style.transform = 'rotate(0deg)';
-            } else {
-                icon.style.transform = 'rotate(180deg)';
-            }
-        }
-
-        var form = document.getElementById("my-form");
-        async function handleSubmit(event) {
-            event.preventDefault();
-            var status = document.getElementById("successMsg");
-            var error = document.getElementById("errorMsg");
-            var btn = document.getElementById("submitBtn");
-            var data = new FormData(event.target);
-            btn.innerHTML = "Sending...";
-            btn.disabled = true;
-            fetch(event.target.action, {
-                method: form.method,
-                body: data,
-                headers: { 'Accept': 'application/json' }
-            }).then(response => {
-                if (response.ok) {
-                    form.classList.add('hidden');
-                    status.classList.remove('hidden');
-                    status.classList.add('flex');
-                } else {
-                    response.json().then(data => {
-                        error.classList.remove('hidden');
-                        btn.innerHTML = "Notify Me";
-                        btn.disabled = false;
-                    })
-                }
-            }).catch(error => {
-                error.classList.remove('hidden');
-                btn.innerHTML = "Notify Me";
-                btn.disabled = false;
-            });
-        }
-        form.addEventListener("submit", handleSubmit);
-    </script>
-</body>
-</html>
+            gainNode.gain.setValueAtTime(0.3, audioCtx.curre
