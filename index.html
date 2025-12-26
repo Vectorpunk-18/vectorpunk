@@ -3,544 +3,256 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GALVECX | OS v5 (AI Edition)</title>
+    <title>VectorPunk1 | Portal</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+
     <style>
-        /* --- IMPORTS --- */
-        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-
-        :root {
-            --bg-color: #0a0a0a;
-            --fg-color: #e0e0e0;
-            --accent-red: #d71921;
-            --accent-yellow: #FFD700;
-            --dim-gray: #2a2a2a;
-            --led-off: #151515;
-            --led-dim: #555;
-            --led-on: #fff;
-            --matrix-font: 'Share Tech Mono', monospace;
-            --pixel-font: 'Press Start 2P', cursive;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; cursor: crosshair; }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--fg-color);
-            font-family: var(--matrix-font);
-            overflow: hidden;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-
-        /* --- VECTOR BACKGROUND CANVAS --- */
-        #vector-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            opacity: 0.3;
-        }
-
-        /* --- MAIN CONTAINER --- */
-        .os-container {
-            position: relative;
-            z-index: 10;
-            width: 90%;
-            max-width: 500px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            pointer-events: none;
-        }
-
-        /* --- WIDGET STYLES --- */
-        .widget {
-            background: rgba(12, 12, 12, 0.9);
-            border: 1px dotted var(--dim-gray);
-            border-radius: 24px;
-            padding: 20px;
-            backdrop-filter: blur(10px);
-            pointer-events: auto;
-            transition: transform 0.2s, border-color 0.2s;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .widget:hover {
-            border-color: var(--fg-color);
-            transform: translateY(-2px);
-        }
-
-        /* --- NEW: AUDIO VISUALIZER WIDGET --- */
-        .visualizer-widget {
-            grid-column: span 2;
-            height: 60px; /* Slim bar */
-            padding: 0;
-            background: rgba(0,0,0,0.8);
-            border: 1px solid var(--dim-gray);
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        #audio-canvas {
-            width: 100%;
-            height: 100%;
-        }
-
-        /* --- HEADER WIDGET --- */
-        .header-widget {
-            grid-column: span 2;
-            text-align: left;
-            border: 1px solid var(--fg-color);
-            background: black;
-            overflow: hidden;
-        }
-
-        h1 {
-            font-family: 'Press Start 2P', cursive;
-            font-size: 2rem;
-            text-transform: uppercase;
-            margin-bottom: 10px;
-            display: flex;
-            gap: 5px;
-        }
-
-        .pixel-letter {
-            opacity: 0;
-            display: inline-block;
-            color: white;
-            text-shadow: 0 0 5px var(--accent-red);
-            transform: translateX(-20px);
-        }
-
-        .letter-active {
-            animation: pixelGlitchIn 0.6s cubic-bezier(0.215, 0.610, 0.355, 1.000) forwards;
-        }
-
-        @keyframes pixelGlitchIn {
-            0% { opacity: 0; transform: translateX(-20px) scale(0.8); filter: brightness(5) contrast(2); color: var(--accent-red); }
-            50% { opacity: 1; filter: brightness(2); color: white; }
-            100% { opacity: 1; transform: translateX(0) scale(1); filter: brightness(1); color: white; }
-        }
+        @keyframes float { 0%, 100% { transform: translate(0, 0px); } 50% { transform: translate(0, -20px); } }
+        @keyframes pulse-slow { 0%, 100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.05); } }
+        @keyframes fade-in-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         
-        .subtitle {
-            font-size: 0.7rem;
-            color: var(--accent-yellow);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            opacity: 0.9;
-            font-weight: bold;
+        /* NEW: Shine/Glow Animation for the Text */
+        @keyframes shine {
+            0% { background-position: -200% center; }
+            100% { background-position: 200% center; }
         }
 
-        /* --- CLOCK WIDGET --- */
-        .clock-widget {
-            aspect-ratio: 1;
-            background: var(--accent-red);
-            color: black;
-            border: none;
-        }
-
-        #clock-time {
-            font-size: 2.5rem;
-            font-weight: bold;
-            line-height: 1;
-        }
-        #clock-date {
-            font-size: 0.9rem;
-            margin-top: 5px;
-            opacity: 0.8;
-        }
-
-        /* --- GLYPH MATRIX WIDGET --- */
-        .glyph-widget {
-            aspect-ratio: 1;
-            padding: 12px;
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            grid-template-rows: repeat(6, 1fr);
-            gap: 6px;
-            background: #000;
-            cursor: pointer;
-        }
-
-        .led {
-            background-color: var(--led-off);
-            border-radius: 50%;
-            transition: background-color 0.2s, box-shadow 0.2s;
-            pointer-events: none;
-        }
+        .animate-float { animation: float 8s ease-in-out infinite; }
+        .animate-pulse-slow { animation: pulse-slow 6s ease-in-out infinite; }
+        .animate-enter { animation: fade-in-up 1s ease-out forwards; opacity: 0; }
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
         
-        .led.on { background-color: var(--led-on); box-shadow: 0 0 8px var(--led-on); }
-        .led.dim { background-color: var(--led-dim); box-shadow: none; }
-
-        @keyframes breatheAnim {
-            0%, 100% { opacity: 0.2; background-color: var(--led-off); }
-            50% { opacity: 1; background-color: var(--led-on); box-shadow: 0 0 10px var(--led-on); }
-        }
-        .led.breathing { animation: breatheAnim 4s ease-in-out infinite; }
-
-        .glyph-mode-text {
-            grid-column: span 6;
-            text-align: center;
-            font-size: 0.6rem;
-            color: var(--accent-red);
-            margin-top: -10px;
-            margin-bottom: 5px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        /* NEW: Class for the glowing text effect */
+        .text-glow-anim {
+            background: linear-gradient(
+                to right,
+                #6b7280 20%, /* Darker Grey (Start) */
+                #ffffff 50%, /* Bright White (The Glow) */
+                #6b7280 80%  /* Darker Grey (End) */
+            );
+            background-size: 200% auto;
+            color: transparent;
+            -webkit-background-clip: text;
+            background-clip: text;
+            animation: shine 3s linear infinite;
         }
 
-        /* --- SOCIAL LINKS --- */
-        .links-widget {
-            grid-column: span 2;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .link-btn {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            text-decoration: none;
-            color: var(--fg-color);
-            background: #111;
-            padding: 15px 20px;
-            border-radius: 50px;
-            border: 1px dotted var(--dim-gray);
-            transition: 0.3s;
-            font-size: 1.1rem;
-        }
-
-        .link-btn:hover {
-            background: var(--fg-color);
-            color: var(--bg-color);
-        }
-
-        /* --- FOOTER --- */
-        .footer {
-            grid-column: span 2;
-            text-align: center;
-            font-size: 0.75rem;
-            color: var(--dim-gray);
-            margin-top: 20px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        .footer span { color: var(--accent-red); }
-
-        @media (max-width: 450px) {
-            h1 { font-size: 1.5rem; gap: 2px; }
-            #clock-time { font-size: 2rem; }
+        body { background-color: #000; color: white; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
     </style>
 </head>
-<body>
+<body class="min-h-screen overflow-x-hidden selection:bg-indigo-500/30">
 
-    <canvas id="vector-canvas"></canvas>
-
-    <div class="os-container">
-
-        <div class="widget visualizer-widget">
-            <canvas id="audio-canvas"></canvas>
-        </div>
-        
-        <div class="widget header-widget">
-            <h1>
-                <span class="pixel-letter">G</span><span class="pixel-letter">A</span><span class="pixel-letter">L</span>
-                <span class="pixel-letter">V</span><span class="pixel-letter">E</span><span class="pixel-letter">C</span><span class="pixel-letter">X</span>
-            </h1>
-            <div class="subtitle">"FORTUNE FAVORS THE BOLD."</div>
-        </div>
-
-        <div class="widget clock-widget">
-            <div>LOC</div>
-            <div>
-                <div id="clock-time">00:00</div>
-                <div id="clock-date">LOADING...</div>
-            </div>
-        </div>
-
-        <div class="widget glyph-widget" id="glyph-grid">
-             <div class="glyph-mode-text" id="mode-display">MODE: BREATHING</div>
-            </div>
-
-        <div class="widget links-widget">
-            <a href="#" class="link-btn"><span>TWITCH</span> <span>-></span></a>
-            <a href="#" class="link-btn"><span>YOUTUBE</span> <span>-></span></a>
-            <a href="#" class="link-btn"><span>DISCORD</span> <span>-></span></a>
-        </div>
-
-        <div class="footer">GALVECX <span>BY</span> VECTORPUNK1</div>
+    <div class="fixed inset-0 z-0">
+        <div class="absolute top-[-10%] left-[-10%] w-[300px] h-[300px] bg-indigo-600/30 rounded-full blur-[100px] animate-pulse-slow"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[300px] h-[300px] bg-purple-600/30 rounded-full blur-[100px] animate-pulse-slow"></div>
+        <div class="absolute top-[40%] left-[50%] translate-x-[-50%] w-[200px] h-[200px] bg-pink-600/20 rounded-full blur-[80px] animate-float"></div>
+        <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"></div>
     </div>
 
+    <main class="relative z-10 min-h-screen flex flex-col items-center justify-center p-6">
+        
+        <div class="flex flex-col items-center text-center mb-10 animate-enter">
+            <div class="relative mb-6 group">
+                <div class="absolute inset-0 rounded-full bg-indigo-500 opacity-40 blur-xl"></div>
+                <img src="https://i.ibb.co/gLGm4NL4/IMG-20251030-154927-685.webp" alt="VectorPunk1 Avatar" class="relative w-32 h-32 rounded-full border-4 border-black shadow-2xl object-cover bg-zinc-900">
+            </div>
+            
+            <h1 class="text-3xl md:text-4xl font-light tracking-[0.3em] uppercase mb-3 text-glow-anim font-sans">
+                VECTORPUNK
+            </h1>
+            
+            <p class="text-zinc-500 text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase">
+                GAMER &bull; STREAMER &bull; CREATOR
+            </p>
+            
+            <button onclick="copyLink()" id="shareBtn" class="mt-8 flex items-center gap-2 text-sm font-medium text-zinc-500 hover:text-white py-2 px-4 rounded-full glass-card transition-all">
+                <i data-lucide="share-2" class="w-4 h-4"></i>
+                <span id="shareText">Share Profile</span>
+            </button>
+        </div>
+
+        <div class="w-full max-w-md flex flex-col gap-4 animate-enter delay-100">
+            <a href="https://twitch.tv/vectorpunk?sr=a" target="_blank" class="glass-card p-4 rounded-2xl flex items-center gap-4 hover:bg-white/10 transition-all group">
+                <div class="w-12 h-12 rounded-xl bg-black/40 flex items-center justify-center border border-white/10">
+                    <i data-lucide="twitch" class="text-purple-400 w-6 h-6 group-hover:scale-110 transition-transform"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="font-semibold text-lg truncate">Twitch</h3>
+                    <p class="text-zinc-400 text-xs truncate">Watch Live Streams</p>
+                </div>
+                <i data-lucide="external-link" class="text-zinc-600 w-4 h-4"></i>
+            </a>
+
+            <a href="https://discord.gg/2gQdKUhv8" target="_blank" class="glass-card p-4 rounded-2xl flex items-center gap-4 hover:bg-white/10 transition-all group">
+                <div class="w-12 h-12 rounded-xl bg-black/40 flex items-center justify-center border border-white/10">
+                    <i data-lucide="message-circle" class="text-indigo-400 w-6 h-6 group-hover:scale-110 transition-transform"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="font-semibold text-lg truncate">Discord</h3>
+                    <p class="text-zinc-400 text-xs truncate">Join the Community</p>
+                </div>
+                <i data-lucide="external-link" class="text-zinc-600 w-4 h-4"></i>
+            </a>
+
+            <a href="https://youtube.com/@vectorpunk1?si=X6kyhLuZRLyP96ne" target="_blank" class="glass-card p-4 rounded-2xl flex items-center gap-4 hover:bg-white/10 transition-all group">
+                <div class="w-12 h-12 rounded-xl bg-black/40 flex items-center justify-center border border-white/10">
+                    <i data-lucide="youtube" class="text-red-500 w-6 h-6 group-hover:scale-110 transition-transform"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="font-semibold text-lg truncate">YouTube</h3>
+                    <p class="text-zinc-400 text-xs truncate">VODs & Highlights</p>
+                </div>
+                <i data-lucide="external-link" class="text-zinc-600 w-4 h-4"></i>
+            </a>
+
+            <a href="https://www.instagram.com/vectorpunk1?igsh=MXF1am1jM3N1eHA0Nw==" target="_blank" class="glass-card p-4 rounded-2xl flex items-center gap-4 hover:bg-white/10 transition-all group">
+                <div class="w-12 h-12 rounded-xl bg-black/40 flex items-center justify-center border border-white/10">
+                    <i data-lucide="instagram" class="text-pink-500 w-6 h-6 group-hover:scale-110 transition-transform"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="font-semibold text-lg truncate">Instagram</h3>
+                    <p class="text-zinc-400 text-xs truncate">Behind the Scenes</p>
+                </div>
+                <i data-lucide="external-link" class="text-zinc-600 w-4 h-4"></i>
+            </a>
+            
+            <div class="mt-2">
+                <button onclick="toggleDonate()" class="w-full glass-card p-4 rounded-2xl flex items-center justify-between hover:bg-white/10 transition-all group">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center border border-green-500/30">
+                            <i data-lucide="heart" class="text-green-400 w-6 h-6 group-hover:scale-110 transition-transform"></i>
+                        </div>
+                        <div class="text-left">
+                            <h3 class="font-semibold text-lg">Support the Stream</h3>
+                            <p class="text-zinc-400 text-xs">Donate via UPI</p>
+                        </div>
+                    </div>
+                    <i data-lucide="chevron-down" id="donateIcon" class="text-zinc-500 w-5 h-5 transition-transform"></i>
+                </button>
+                
+                <div id="donateSection" class="hidden glass-card mt-2 p-6 rounded-2xl text-center border-t-0">
+                    <p class="text-sm text-zinc-300 mb-4">Scan to support the channel! 🚀</p>
+                    <div class="relative mx-auto w-48 h-48 bg-white p-2 rounded-xl">
+                        <img src="https://i.ibb.co/v4NV5R3v/vecupijpg.jpg" alt="UPI QR Code" class="w-full h-full object-contain">
+                    </div>
+                    <p class="text-xs text-zinc-500 mt-4">Thank you for the support!</p>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="w-full max-w-md mt-8 animate-enter delay-200">
+            <div class="glass-card rounded-3xl p-6 text-center relative overflow-hidden">
+                <div class="relative z-10">
+                    <div class="w-10 h-10 bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-3 border border-white/10">
+                        <i data-lucide="bell" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <h3 class="font-bold text-lg mb-1">Get Notified</h3>
+                    <p class="text-zinc-400 text-xs mb-4">Email alerts when I go live.</p>
+
+                    <form 
+                        id="my-form"
+                        action="https://formspree.io/f/xvgewpln" 
+                        method="POST"
+                        class="flex flex-col gap-3"
+                    >
+                        <input type="email" name="email" id="emailInput" required placeholder="Enter email..." class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 transition-colors text-white">
+                        <button type="submit" id="submitBtn" class="w-full bg-white text-black font-bold text-sm py-3 rounded-xl hover:bg-zinc-200 transition-colors">Notify Me</button>
+                    </form>
+
+                    <div id="successMsg" class="hidden flex-col items-center gap-2 text-green-400 bg-green-500/10 p-3 rounded-xl border border-green-500/20">
+                        <i data-lucide="check-circle-2" class="w-6 h-6"></i>
+                        <span class="font-semibold text-sm">You're on the list!</span>
+                    </div>
+                     <div id="errorMsg" class="hidden text-red-400 text-xs mt-2">Oops! Something went wrong.</div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="mt-10 text-zinc-700 text-xs font-medium animate-enter delay-300">
+            © 2024 vectorpunk1
+        </footer>
+
+    </main>
+
     <script>
-        /* --- 0. HEADER ANIMATION --- */
-        window.addEventListener('load', () => {
-            const letters = document.querySelectorAll('.pixel-letter');
-            letters.forEach((letter, index) => {
-                setTimeout(() => { letter.classList.add('letter-active'); }, index * 150);
-            });
-        });
+        // Initialize Icons
+        lucide.createIcons();
 
-        /* --- 1. NEW: AUTOMATIC AUDIO VISUALIZER --- */
-        const audioCanvas = document.getElementById('audio-canvas');
-        const actx = audioCanvas.getContext('2d');
-        
-        let barCount = 40;
-        let barWidth;
-        let bars = [];
-
-        function resizeAudio() {
-            audioCanvas.width = audioCanvas.parentElement.offsetWidth;
-            audioCanvas.height = audioCanvas.parentElement.offsetHeight;
-            barWidth = audioCanvas.width / barCount;
-        }
-        window.addEventListener('resize', resizeAudio);
-        resizeAudio();
-
-        // Initialize bars
-        for(let i=0; i<barCount; i++) {
-            bars.push({
-                h: 10,
-                targetH: 10,
-                speed: 0.1
-            });
+        // Copy Link Function
+        function copyLink() {
+            navigator.clipboard.writeText(window.location.href);
+            const btn = document.getElementById('shareText');
+            const originalText = btn.innerText;
+            btn.innerText = "Copied!";
+            setTimeout(() => {
+                btn.innerText = originalText;
+            }, 2000);
         }
 
-        let isSpeaking = false;
-        
-        // Randomly toggle between "Speaking" (Active) and "Listening" (Idle) modes
-        setInterval(() => {
-            isSpeaking = !isSpeaking;
-        }, 3000); // Change mode every 3 seconds
-
-        function animateAudio() {
-            actx.clearRect(0, 0, audioCanvas.width, audioCanvas.height);
+        // Toggle Donation Section
+        function toggleDonate() {
+            const section = document.getElementById('donateSection');
+            const icon = document.getElementById('donateIcon');
+            section.classList.toggle('hidden');
             
-            let centerX = audioCanvas.width / 2;
+            if (section.classList.contains('hidden')) {
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                icon.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        // Handle Formspree Submission without redirect
+        var form = document.getElementById("my-form");
+        
+        async function handleSubmit(event) {
+            event.preventDefault();
+            var status = document.getElementById("successMsg");
+            var error = document.getElementById("errorMsg");
+            var btn = document.getElementById("submitBtn");
             
-            for(let i=0; i<barCount; i++) {
-                let bar = bars[i];
-                
-                // Logic: Middle bars are taller, edge bars are shorter
-                let distFromCenter = Math.abs(i - barCount/2);
-                let maxH = audioCanvas.height * (1 - (distFromCenter / (barCount/2))); 
-                
-                // Random Target Generation
-                if(Math.random() > 0.5) {
-                    let multiplier = isSpeaking ? 0.9 : 0.2; // Speak loud vs Listen quiet
-                    bar.targetH = Math.random() * maxH * multiplier + 5;
+            var data = new FormData(event.target);
+            
+            btn.innerHTML = "Sending...";
+            btn.disabled = true;
+
+            fetch(event.target.action, {
+                method: form.method,
+                body: data,
+                headers: {
+                    'Accept': 'application/json'
                 }
-
-                // Smooth interpolation (Ease-out)
-                bar.h += (bar.targetH - bar.h) * 0.2;
-
-                // Color Logic
-                if (i % 5 === 0) actx.fillStyle = '#d71921'; // Red accents
-                else if (i % 7 === 0) actx.fillStyle = '#FFD700'; // Yellow accents
-                else actx.fillStyle = '#e0e0e0'; // White/Gray
-
-                // Draw Rounded Bar
-                let x = i * barWidth;
-                let y = (audioCanvas.height - bar.h) / 2; // Center vertically
-                
-                // Draw Pill Shape
-                actx.beginPath();
-                actx.roundRect(x + 2, y, barWidth - 4, bar.h, 5); 
-                actx.fill();
-            }
-
-            requestAnimationFrame(animateAudio);
-        }
-        animateAudio();
-
-
-        /* --- 2. CLOCK --- */
-        function updateClock() {
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
-            const dateStr = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }).toUpperCase();
-            document.getElementById('clock-time').textContent = timeStr;
-            document.getElementById('clock-date').textContent = dateStr;
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
-
-        /* --- 3. GLYPH LOGIC (9 Modes) --- */
-        const glyphGrid = document.getElementById('glyph-grid');
-        const modeDisplay = document.getElementById('mode-display');
-        let ledsDOM = [];
-        let patternInterval;
-        let currentMode = 0;
-
-        for (let i = 0; i < 36; i++) {
-            const led = document.createElement('div');
-            led.classList.add('led');
-            glyphGrid.appendChild(led);
-            ledsDOM.push(led);
-        }
-
-        function clearLeds() { ledsDOM.forEach(led => { led.className = 'led'; }); }
-
-        // PATTERNS
-        function startBreathing() {
-            modeDisplay.textContent = "MODE: BREATHING";
-            clearLeds();
-            ledsDOM.forEach(led => led.classList.add('breathing'));
-        }
-        function startScanner() {
-            modeDisplay.textContent = "MODE: SCANNER";
-            clearLeds();
-            let col = 0; let direction = 1;
-            patternInterval = setInterval(() => {
-                clearLeds();
-                for(let row=0; row<6; row++) ledsDOM[row*6 + col].classList.add('on');
-                col += direction;
-                if(col === 5 || col === 0) direction *= -1;
-            }, 150);
-        }
-        function startRipple() {
-            modeDisplay.textContent = "MODE: RIPPLE";
-            clearLeds();
-            let step = 0;
-            const rings = [[14,15,20,21], [7,8,9,10,13,16,19,22,25,26,27,28], [0,1,2,3,4,5,6,11,12,17,18,23,24,29,30,31,32,33,34,35]];
-            patternInterval = setInterval(() => {
-                clearLeds();
-                rings[step].forEach(idx => ledsDOM[idx].classList.add('on'));
-                step = (step + 1) % 3;
-            }, 400);
-        }
-        function startX() {
-            modeDisplay.textContent = "MODE: THE 'X'";
-            clearLeds();
-            const xIndices = [0,7,14,21,28,35, 5,10,15,20,25,30];
-            let isOn = true;
-            patternInterval = setInterval(() => {
-               clearLeds();
-               xIndices.forEach(idx => ledsDOM[idx].classList.add(isOn ? 'on' : 'dim'));
-               isOn = !isOn;
-            }, 800);
-        }
-        function startBinary() {
-            modeDisplay.textContent = "MODE: BINARY RAIN";
-            clearLeds();
-            patternInterval = setInterval(() => {
-                for(let i=0; i<36; i++) {
-                    if(Math.random() > 0.9) ledsDOM[i].classList.remove('on', 'dim');
-                    if(Math.random() > 0.95) ledsDOM[i].classList.add('on');
-                    else if(Math.random() > 0.7) ledsDOM[i].classList.add('dim');
+            }).then(response => {
+                if (response.ok) {
+                    form.classList.add('hidden');
+                    status.classList.remove('hidden');
+                    status.classList.add('flex');
+                } else {
+                    response.json().then(data => {
+                        error.classList.remove('hidden');
+                        btn.innerHTML = "Notify Me";
+                        btn.disabled = false;
+                    })
                 }
-            }, 100);
-        }
-        function startSparkle() {
-            modeDisplay.textContent = "MODE: SPARKLE CHAOS";
-            clearLeds();
-            patternInterval = setInterval(() => {
-                clearLeds();
-                for(let i=0; i<5; i++) ledsDOM[Math.floor(Math.random()*36)].classList.add('on');
-            }, 150);
-        }
-        function startSpinner() {
-            modeDisplay.textContent = "MODE: PERIMETER";
-            clearLeds();
-            const border = [0,1,2,3,4,5, 11,17,23,29,35, 34,33,32,31,30, 24,18,12,6];
-            let idx = 0;
-            patternInterval = setInterval(() => {
-                clearLeds();
-                let trail1 = (idx - 1 + border.length) % border.length;
-                let trail2 = (idx - 2 + border.length) % border.length;
-                ledsDOM[border[idx]].classList.add('on');
-                ledsDOM[border[trail1]].classList.add('dim');
-                ledsDOM[border[trail2]].classList.add('dim');
-                idx = (idx + 1) % border.length;
-            }, 60);
-        }
-        function startEqualizer() {
-            modeDisplay.textContent = "MODE: EQUALIZER";
-            clearLeds();
-            patternInterval = setInterval(() => {
-                clearLeds();
-                for(let col=0; col<6; col++) {
-                    let height = Math.floor(Math.random() * 6);
-                    for(let i=0; i<height; i++) {
-                        let row = 5 - i;
-                        ledsDOM[row*6 + col].classList.add('on');
-                    }
-                }
-            }, 120);
-        }
-        function startConverge() {
-            modeDisplay.textContent = "MODE: CONVERGE";
-            clearLeds();
-            let step = 0;
-            const rings = [[0,1,2,3,4,5,6,11,12,17,18,23,24,29,30,31,32,33,34,35], [7,8,9,10,13,16,19,22,25,26,27,28], [14,15,20,21]];
-            patternInterval = setInterval(() => {
-                clearLeds();
-                rings[step].forEach(idx => ledsDOM[idx].classList.add('on'));
-                step = (step + 1) % 3;
-            }, 300);
-        }
-
-        const patterns = [startBreathing, startScanner, startRipple, startX, startBinary, startSparkle, startSpinner, startEqualizer, startConverge];
-        function nextPattern() {
-            clearInterval(patternInterval);
-            currentMode = (currentMode + 1) % patterns.length;
-            patterns[currentMode]();
-        }
-        glyphGrid.addEventListener('click', nextPattern);
-        startBreathing();
-
-        /* --- 4. VECTOR BACKGROUND --- */
-        const canvas = document.getElementById('vector-canvas');
-        const ctx = canvas.getContext('2d');
-        let width, height;
-        let particles = [];
-        function resize() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; }
-        window.addEventListener('resize', resize);
-        resize();
-        class Particle {
-            constructor() {
-                this.x = Math.random() * width; this.y = Math.random() * height;
-                this.vx = (Math.random() - 0.5) * 1; this.vy = (Math.random() - 0.5) * 1; this.size = Math.random() * 2;
-            }
-            update() {
-                this.x += this.vx; this.y += this.vy;
-                if (this.x < 0 || this.x > width) this.vx *= -1;
-                if (this.y < 0 || this.y > height) this.vy *= -1;
-            }
-            draw() { ctx.fillStyle = '#333'; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); }
-        }
-        for (let i = 0; i < 60; i++) particles.push(new Particle());
-        let mouse = { x: null, y: null };
-        window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
-        function animate() {
-            ctx.clearRect(0, 0, width, height);
-            ctx.fillStyle = '#1a1a1a';
-            for(let x=0; x<width; x+=40) { for(let y=0; y<height; y+=40) ctx.fillRect(x, y, 1, 1); }
-            particles.forEach(p => {
-                p.update(); p.draw();
-                if(mouse.x) {
-                    let dx = p.x - mouse.x; let dy = p.y - mouse.y; let dist = Math.sqrt(dx*dx + dy*dy);
-                    if (dist < 150) {
-                        ctx.strokeStyle = 'rgba(215, 25, 33, 0.4)'; ctx.lineWidth = 0.8;
-                        ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(mouse.x, mouse.y); ctx.stroke();
-                    }
-                }
+            }).catch(error => {
+                error.classList.remove('hidden');
+                btn.innerHTML = "Notify Me";
+                btn.disabled = false;
             });
-            requestAnimationFrame(animate);
         }
-        animate();
+        form.addEventListener("submit", handleSubmit);
     </script>
 </body>
 </html>
